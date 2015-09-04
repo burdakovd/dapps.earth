@@ -4,6 +4,8 @@ var base32    = require('base32.js')
 var base58    = require('base58-native')
 var proxy     = httpProxy.createProxyServer()
 
+// sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 31337
+
 http.createServer(function(req, res) {
   var hshcaRegexFailure = false
 
@@ -26,6 +28,6 @@ http.createServer(function(req, res) {
 
     proxy.web(req, res, { target: 'http://ipfs.neocitiesops.net:8080/ipfs/'+ipfsHash })
   }
-}).listen(80, '0.0.0.0')
+}).listen(31337, '0.0.0.0')
 
 console.log('Server running')
