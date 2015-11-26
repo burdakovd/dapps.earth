@@ -4,6 +4,10 @@ var base32    = require('base32.js')
 var base58    = require('base58-native')
 var proxy     = httpProxy.createProxyServer()
 
+proxy.on('error', function(e) {
+  console.log('proxy error: '+e)
+})
+
 // sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 31337
 
 http.createServer(function(req, res) {
