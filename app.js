@@ -26,7 +26,7 @@ http.createServer(function(req, res) {
 
     console.log(ipfsHash)
 
-    proxy.web(req, res, { target: 'http://ipfs.neocitiesops.net:8080/ipfs/'+ipfsHash })
+    proxy.web(req, res, { target: 'http://127.0.0.1:8080/ipfs/'+ipfsHash })
   }
 }).listen(31337, '0.0.0.0')
 
