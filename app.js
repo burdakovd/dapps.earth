@@ -22,7 +22,10 @@ var handlers = {
   ['^ipfs\\.' + regexify(BASE_DOMAIN) + '$']: function (req, res, match) {
     var path = url.parse(req.url).pathname
     if (path === '/') {
-      res.writeHead(302, {'Location': 'https://github.com/burdakovd/hshca-proxy'});
+      res.writeHead(
+        302,
+        {'Location': 'https://github.com/burdakovd/hshca-proxy'},
+      );
       res.end('')
       return;
     }
@@ -32,7 +35,7 @@ var handlers = {
     )
     if (matches == null) {
       res.writeHead(404, {'Content-Type': 'text/plain'});
-      res.end('Not found\n')
+      res.end('Unrecognized ipfs path: ' + path + '\n')
       return;
     }
     var ipfsHash = matches[1]
@@ -52,13 +55,21 @@ var handlers = {
     var multihash = decoder.write(hshca.toUpperCase()).finalize()
     var ipfsHash = base58.encode(multihash)
     // TODO: switch to local node if there is noticeable traffic
-    proxy.web(req, res, { target: 'https://gateway.ipfs.io/ipfs/' + ipfsHash, changeOrigin: true })
+    proxy.web(
+      req,
+      res,
+      { target: 'https://gateway.ipfs.io/ipfs/' + ipfsHash, changeOrigin: true }
+    )
   },
   // if someone is accessing swarm subdomain, proxy to swarm
   ['^(.+)\\.swarm\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
     var name = match[1]
     // TODO: switch to local node if there is noticeable traffic
-    proxy.web(req, res, { target: 'https://swarm-gateways.net/bzz:/' + name, changeOrigin: true })
+    proxy.web(
+      req,
+      res,
+      { target: 'https://swarm-gateways.net/bzz:/' + name, changeOrigin: true }
+    )
   },
 };
 
@@ -76,13 +87,15 @@ http.createServer(function(req, res) {
 
     if (eligible.length === 0) {
       res.writeHead(404, {'Content-Type': 'text/plain'});
-      res.end('Not found\n')
+      res.end('Unrecognized domain: ' + req.headers.host + '\n');
       return;
     }
 
     if (eligible.length > 1) {
       throw new Error(
-        'Multiple handlers matched: ' + JSON.stringify(eligible.map(([r, m]) => r)),
+        'Multiple handlers matched: ' + JSON.stringify(
+          eligible.map(([r, m]) => r),
+        ),
       );
     }
 
