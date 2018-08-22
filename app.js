@@ -46,9 +46,15 @@ var handler = function(req, res) {
 
   // if someone is accessing subdomain, decode hshca and proxy to ipfs
   try {
-    var hshca = req.headers.host.match(
+    var hshcaMatch = req.headers.host.match(
       new RegExp('^(.+)\\.ipfs\\..+$', 'i')
-    )[1]
+    )
+    if (hshcaMatch == null) {
+      res.writeHead(404, {'Content-Type': 'text/plain'});
+      res.end('Not found\n')
+      return;
+    }
+    var hshca = hshcaMatch[1]
   } catch(e) {
     console.log(e)
     res.writeHead(404, {'Content-Type': 'text/plain'});
