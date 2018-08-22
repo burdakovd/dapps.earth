@@ -8,6 +8,12 @@
     "type": "git",
     "url": "https://github.com/neocities/hshca-proxy.git"
   },
+  "scripts": {
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": "8.9.1"
+  },
   "dependencies": {
     "http-proxy": "*",
     "base32.js":     "*",
