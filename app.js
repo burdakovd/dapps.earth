@@ -10,14 +10,17 @@ proxy.on('error', function(e) {
   console.log('proxy error: '+e)
 })
 
-var handler = function(req, res) {
-  console.log(req.headers.host)
-  var path = url.parse(req.url).pathname
-  console.log(path)
+const BASE_DOMAIN = process.env.BASE_DOMAIN;
+const HAS_SSL = process.env.HAS_SSL;
 
+const regexify = function(s) {
+  return s.replace('.', '\\.').replace('-', '\\-');
+}
+
+var handlers = {
   // if someone is accessing ipfs without subdomain, redirect them
-  var baseHostMatch = req.headers.host.match(new RegExp('^ipfs\\..+$', 'i'));
-  if (baseHostMatch) {
+  ['^ipfs\\.' + regexify(BASE_DOMAIN) + '$']: function (req, res, match) {
+    var path = url.parse(req.url).pathname
     if (path === '/') {
       res.writeHead(302, {'Location': 'https://github.com/burdakovd/hshca-proxy'});
       res.end('')
@@ -37,43 +40,55 @@ var handler = function(req, res) {
     var multihash = base58.decode(ipfsHash)
     var encoder = new base32.Encoder({ type: "rfc4648" })
     var hshca = encoder.write(multihash).finalize()
-    var newDestination = process.env.HAS_SSL ? 'https://' : 'http://' +
+    var newDestination = HAS_SSL ? 'https://' : 'http://' +
       hshca + '.' + req.headers.host + subPath;
     res.writeHead(302, {'Location': newDestination});
     res.end('')
-    return;
-  }
+  },
+  // if someone is accessing ipfs subdomain, decode hshca and proxy to ipfs
+  ['^(.+)\\.ipfs\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
+    var hshca = match[1]
+    var decoder = new base32.Decoder({ type: "rfc4648" })
+    var multihash = decoder.write(hshca.toUpperCase()).finalize()
+    var ipfsHash = base58.encode(multihash)
+    // TODO: switch to local node if there is noticeable traffic
+    proxy.web(req, res, { target: 'https://gateway.ipfs.io/ipfs/' + ipfsHash, changeOrigin: true })
+  },
+  // if someone is accessing swarm subdomain, proxy to swarm
+  ['^(.+)\\.swarm\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
+    var name = match[1]
+    // TODO: switch to local node if there is noticeable traffic
+    proxy.web(req, res, { target: 'https://swarm-gateways.net/bzz:/' + name, changeOrigin: true })
+  },
+};
 
-  // if someone is accessing subdomain, decode hshca and proxy to ipfs
+http.createServer(function(req, res) {
   try {
-    var hshcaMatch = req.headers.host.match(
-      new RegExp('^(.+)\\.ipfs\\..+$', 'i')
-    )
-    if (hshcaMatch == null) {
+    console.log(req.headers.host)
+    var path = url.parse(req.url).pathname
+    console.log(path)
+
+    const eligible = Object.keys(handlers).map(
+      r => [r, req.headers.host.match(new RegExp(r, 'i'))],
+    ).filter(
+      ([r, m]) => m != null
+    );
+
+    if (eligible.length === 0) {
       res.writeHead(404, {'Content-Type': 'text/plain'});
       res.end('Not found\n')
       return;
     }
-    var hshca = hshcaMatch[1]
-  } catch(e) {
-    console.log(e)
-    res.writeHead(404, {'Content-Type': 'text/plain'});
-    res.end('Invalid HSHCA hash for archive lookup\n')
-    return;
-  }
 
-  var decoder = new base32.Decoder({ type: "rfc4648" })
-  var multihash = decoder.write(hshca.toUpperCase()).finalize()
-  var ipfsHash = base58.encode(multihash)
+    if (eligible.length > 1) {
+      throw new Error(
+        'Multiple handlers matched: ' + JSON.stringify(eligible.map(([r, m]) => r)),
+      );
+    }
 
-  console.log(ipfsHash)
+    const [name, match] = eligible[0];
 
-  proxy.web(req, res, { target: 'https://gateway.ipfs.io/ipfs/' + ipfsHash, changeOrigin: true })
-}
-
-http.createServer(function(req, res) {
-  try {
-    handler(req, res);
+    handlers[name](req, res, match);
   } catch(e) {
     console.log(e);
     res.writeHead(500, {'Content-Type': 'text/plain'});
