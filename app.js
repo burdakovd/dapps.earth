@@ -39,7 +39,8 @@ var handlers = {
     }
     var cid = new CID(matches[1])
     var subPath = matches[2]
-    const CIDv1base32 = cid.toV1().toBaseEncodedString('base32');
+    const CIDv1 = cid.toV1();
+    const CIDv1base32 = CIDv1.toBaseEncodedString('base32');
     var newDestination = HAS_SSL ? 'https://' : 'http://' +
       CIDv1base32 + '.' + req.headers.host + subPath;
     res.writeHead(302, {'Location': newDestination});
