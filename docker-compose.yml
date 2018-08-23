@@ -1,9 +1,11 @@
 version: '3'
 services:
-  web:
+  proxy:
     build: .
-    ports:
-     - "80:8080"
     environment:
      - BASE_DOMAIN
      - HAS_SSL
+  frontend:
+    build: nginx
+    ports:
+      - "80:8080"
