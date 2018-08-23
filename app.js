@@ -47,14 +47,15 @@ var handlers = {
   },
   // if someone is accessing ipfs subdomain, proxy to ipfs
   ['^(.+)\\.ipfs\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
+    const cid = new CID(match[1]);
+    const backendCID = cid.codec === 'dag-pb' ? cid.toV0() : cid;
     // TODO: switch to local node if there is noticeable traffic
     proxy.web(
       req,
       res,
       {
-        target: 'https://gateway.ipfs.io/ipfs/' + (
-          new CID(match[1])
-        ).toV0().toBaseEncodedString(),
+        target:
+          'https://gateway.ipfs.io/ipfs/' + backendCID.toBaseEncodedString(),
         changeOrigin: true,
       },
     )
