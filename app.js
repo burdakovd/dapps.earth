@@ -1,7 +1,6 @@
 var httpProxy = require('http-proxy')
 var http      = require('http')
-var base32    = require('base32.js')
-var base58    = require('base58-native')
+var CID       = require('cids')
 var process   = require('process')
 var url       = require('url')
 var proxy     = httpProxy.createProxyServer()
@@ -38,27 +37,26 @@ var handlers = {
       res.end('Unrecognized ipfs path: ' + path + '\n')
       return;
     }
-    var ipfsHash = matches[1]
+    var cid = new CID(matches[1])
     var subPath = matches[2]
-    var multihash = base58.decode(ipfsHash)
-    var encoder = new base32.Encoder({ type: "rfc4648" })
-    var hshca = encoder.write(multihash).finalize()
+    const CIDv1base32 = cid.toV1().toBaseEncodedString('base32');
     var newDestination = HAS_SSL ? 'https://' : 'http://' +
-      hshca + '.' + req.headers.host + subPath;
+      CIDv1base32 + '.' + req.headers.host + subPath;
     res.writeHead(302, {'Location': newDestination});
     res.end('')
   },
-  // if someone is accessing ipfs subdomain, decode hshca and proxy to ipfs
+  // if someone is accessing ipfs subdomain, proxy to ipfs
   ['^(.+)\\.ipfs\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
-    var hshca = match[1]
-    var decoder = new base32.Decoder({ type: "rfc4648" })
-    var multihash = decoder.write(hshca.toUpperCase()).finalize()
-    var ipfsHash = base58.encode(multihash)
     // TODO: switch to local node if there is noticeable traffic
     proxy.web(
       req,
       res,
-      { target: 'https://gateway.ipfs.io/ipfs/' + ipfsHash, changeOrigin: true }
+      {
+        target: 'https://gateway.ipfs.io/ipfs/' + (
+          new CID(match[1])
+        ).toV0().toBaseEncodedString(),
+        changeOrigin: true,
+      },
     )
   },
   // if someone is accessing swarm subdomain, proxy to swarm
@@ -98,7 +96,6 @@ http.createServer(function(req, res) {
         ),
       );
     }
-
     const [name, match] = eligible[0];
 
     handlers[name](req, res, match);

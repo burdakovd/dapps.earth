@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "http-proxy": "*",
-    "base32.js":     "*",
-    "base58-native": "*"
+    "cids": "^0.5.3"
   }
 }
