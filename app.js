@@ -73,6 +73,8 @@ var handlers = {
   },
 };
 
+const PORT = process.env.PORT || 8080
+
 http.createServer(function(req, res) {
   try {
     console.log(req.headers.host)
@@ -106,6 +108,6 @@ http.createServer(function(req, res) {
     res.writeHead(500, {'Content-Type': 'text/plain'});
     res.end('Internal error\n')
   }
-}).listen(process.env.PORT || 8080, '0.0.0.0')
+}).listen(PORT, '0.0.0.0')
 
-console.log('Server running')
+console.log('Server running: ' + BASE_DOMAIN + ':' + PORT)
