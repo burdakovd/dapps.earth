@@ -1,5 +1,5 @@
 DOCKER_COMPOSE_VERSION: 1.22.0
 
 script:
- - docker pull
- - docker build
+ - docker-compose pull
+ - docker-compose build
