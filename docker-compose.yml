@@ -7,11 +7,13 @@ version: '3'
 
 services:
   proxy:
+    restart: always
     build: proxy
     environment:
      - BASE_DOMAIN
      - HAS_SSL=1
   frontend:
+    restart: always
     build: nginx
     environment:
       - BASE_DOMAIN
@@ -21,6 +23,7 @@ services:
       - "80:8080"
       - "443:443"
   ssl-renewer:
+    restart: always
     build: ssl-renewer
     environment:
       - ADMIN_EMAIL
@@ -32,6 +35,7 @@ services:
       - ssl-renewer-successes:/successes
       - certs:/etc/nginx/certs
   acme-dns:
+    restart: always
     build: acme-dns
     environment:
       - BASE_DOMAIN
