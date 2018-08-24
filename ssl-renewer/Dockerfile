@@ -1,9 +1,8 @@
-FROM nginx:stable
+FROM ubuntu
 
+RUN mkdir -p /usr/local/bin
 RUN apt-get update && \
-  apt-get -y --no-install-recommends install \
-  wget ca-certificates git inotify-tools
-
+  apt-get -y --no-install-recommends install wget ca-certificates git
 RUN \
   wget -O /usr/local/bin/dumb-init \
   https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64 && \
@@ -19,11 +18,18 @@ RUN cd /tmp && \
   cd /tmp && \
   rm -r /tmp/wait-for
 
+FROM neilpang/acme.sh
+
+RUN apk update && apk add bash jq bc
+
+COPY --from=0 /usr/local/bin/dumb-init /usr/local/bin/dumb-init
+COPY --from=0 /bin/wait-for /bin/wait-for
+COPY start.sh ./
+
+VOLUME /acme-dns-auth
+VOLUME /successes
 VOLUME /etc/nginx/certs
 
-WORKDIR /root
-COPY start.sh ./
-COPY nginx-template.conf /etc/nginx/nginx-template.conf
-
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
+
 CMD ["./start.sh"]

@@ -1,11 +1,49 @@
 version: '3'
+
+# Need to provide the following environment variables when running:
+# - BASE_DOMAIN (accessible to target audience, not necessarily public internet)
+# - NS_DOMAIN (accessible to public internet)
+# - ADMIN_EMAIL
+
 services:
   proxy:
-    build: .
+    build: proxy
     environment:
      - BASE_DOMAIN
-     - HAS_SSL
+     - HAS_SSL=1
   frontend:
     build: nginx
+    environment:
+      - BASE_DOMAIN
+    volumes:
+      - certs:/etc/nginx/certs:ro
     ports:
       - "80:8080"
+      - "443:443"
+  ssl-renewer:
+    build: ssl-renewer
+    environment:
+      - ADMIN_EMAIL
+      - BASE_DOMAIN
+      - NS_DOMAIN
+      - HOSTS=ipfs.$BASE_DOMAIN *.ipfs.$BASE_DOMAIN *.eth.swarm.$BASE_DOMAIN
+    volumes:
+      - ssl-renewer-auth:/acme-dns-auth
+      - ssl-renewer-successes:/successes
+      - certs:/etc/nginx/certs
+  acme-dns:
+    build: acme-dns
+    environment:
+      - BASE_DOMAIN
+      - NS_DOMAIN
+      - ADMIN_EMAIL
+    ports:
+      - "53:53/udp"
+    volumes:
+      - acme-dns-data:/var/lib/acme-dns
+
+volumes:
+  acme-dns-data:
+  ssl-renewer-auth:
+  ssl-renewer-successes:
+  certs:
