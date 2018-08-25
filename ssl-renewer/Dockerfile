@@ -20,7 +20,7 @@ RUN cd /tmp && \
 
 FROM neilpang/acme.sh
 
-RUN apk update && apk add bash jq bc
+RUN apk update && apk add bash jq bc bind-tools
 
 COPY --from=0 /usr/local/bin/dumb-init /usr/local/bin/dumb-init
 COPY --from=0 /bin/wait-for /bin/wait-for
