@@ -30,7 +30,7 @@ function get_credentials() {
   load_credentials $CREDENTIALS_FILE || return 1
 }
 
-CACHE_VERSION=6
+CACHE_VERSION=7
 
 function record_success() {
   HOST="$1"
