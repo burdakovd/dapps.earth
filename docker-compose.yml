@@ -22,6 +22,9 @@ services:
     ports:
       - "80:8080"
       - "443:443"
+    depends_on:
+      - proxy
+      - ssl-renewer
   ssl-renewer:
     restart: always
     build: ssl-renewer
@@ -35,6 +38,8 @@ services:
       - ssl-renewer-auth:/acme-dns-auth
       - ssl-renewer-successes:/successes
       - certs:/etc/nginx/certs
+    depends_on:
+      - acme-dns
   acme-dns:
     restart: always
     build: acme-dns
