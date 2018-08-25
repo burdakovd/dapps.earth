@@ -104,15 +104,14 @@ while true; do
           &
         if wait $!; then
           echo "Got certificate for $HOSTS..."
+          HOST=$(echo $HOSTS | awk '{print $1}')
+          SANITIZED_HOST=$(echo $HOST | sed 's/[*]/wildcard/')
           mkdir -p /etc/nginx/certs/$SANITIZED_HOST
-          for HOST in $(echo $HOSTS | awk '{print $1}'); do
-            SANITIZED_HOST=$(echo $HOST | sed 's/[*]/wildcard/')
-            acme.sh --install-cert -d $HOST \
-              --cert-file /etc/nginx/certs/$SANITIZED_HOST/cert \
-              --key-file /etc/nginx/certs/$SANITIZED_HOST/key \
-              --fullchain-file /etc/nginx/certs/$SANITIZED_HOST/fullchain \
-              --reloadcmd "true"
-          done
+          acme.sh --install-cert -d $HOST \
+            --cert-file /etc/nginx/certs/$SANITIZED_HOST/cert \
+            --key-file /etc/nginx/certs/$SANITIZED_HOST/key \
+            --fullchain-file /etc/nginx/certs/$SANITIZED_HOST/fullchain \
+            --reloadcmd "true"
           date >> /etc/nginx/certs/signal
           record_success "$HOSTS"
         else
