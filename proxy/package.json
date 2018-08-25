@@ -1,12 +1,12 @@
 {
-  "name": "hshca-proxy",
-  "description": "Quick-up hshca proxy for IPFS",
-  "version": "0.0.1",
+  "name": "dapps-earth-proxy",
+  "description": "Proxy for IPFS/Swarm/ENS",
+  "version": "0.0.2",
   "main": "app.js",
-  "author": "Kyle Drake <kyle@neocities.org>",
+  "author": "Daniil Burdakov <icqkill@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/neocities/hshca-proxy.git"
+    "url": "https://github.com/burdakovd/dapps.earth.git"
   },
   "scripts": {
     "start": "node app.js"
