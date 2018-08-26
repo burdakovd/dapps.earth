@@ -8,7 +8,7 @@ env:
     - secure: "TrMTZNyXCG3cgqv5jpqQHXCeVbN3SJD71/ZXaSTdQP58gGOt5gAlIHnGPOmNhwKKqQkwIosbkkMcWx2nj5t8WoGH6c8ZNzKQAK+E/ZYZET2V112SX72zqLF5SuKSceX+eT33lolCOyoFVreW6GkURKzDmcTpsnJ0/bUKXJpg3NI3Zfm1dQZ4o8FnjTBKp68vM1AvDCH+dPY9nTUgsS0Gi78uDgZ9Le5GaNKPVo58fa8n+tE2bD0cVFE9o1g8VEIGrsBUmrPjKnX9vlD6A3AWX9obIA6BJ2GHGIroV7sEdLax+AjRAFk+LzRocjRIG9i6+IBnoq2qMirl8yqS7dpql3boZhu362OtmJUC0GAaTVaIYDExMCYjYfs0RoU+Ypwt2sCP/+aWZTf2IjM8pX+2+qQ0HcKBQHQTRVMU0/Of9MAE7TV8Oe6ugiuFZSjQlteauk9d1xw4VpTgYVS4ng0zZs6s8TjsZ9tXvPWpyhY7Vpa0qSNCg7sNjXVdBTEMjZHnsZv67c43eZmmr2n8aSaqhUmRzpVaswkZe+qozAWo9LMxYSbIHf3klKBRGzd4YhRbkCcGdEI8dDmUI5xM9PRcHzARzpYzx7dnywwtP30dSPBtYlqrvA68kiQ+4eSitD3JUXyD0wcDfGAV4Tk0DDUwJ7wOhBwR+agGclA+pHAFWHM="
 
 before_install:
-  - sudo apt-get jq
+  - sudo apt-get install jq
 
 script:
  - docker-compose pull
