@@ -71,8 +71,15 @@ cat << 'EOF' > /home/travis/deploy
 #!/bin/bash -e
 
 echo "Connection: $SSH_CONNECTION"
-COMMIT="$SSH_ORIGINAL_COMMAND"
+
+[[ "$SSH_ORIGINAL_COMMAND" =~ ^[a-z0-9]+\ \.env(\.[a-z]+)?$ ]]
+COMMIT=$(echo "$SSH_ORIGINAL_COMMAND" | cut -f1 -d' ')
+ENV=$(echo "$SSH_ORIGINAL_COMMAND" | cut -f2 -d' ')
+
 echo "Commit: $COMMIT"
+echo "Env: $ENV"
+
+. $ENV
 
 WORKDIR=$(mktemp -d)
 echo "Working directory: $WORKDIR"
