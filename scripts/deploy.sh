@@ -38,7 +38,7 @@ else
   fi
 
   echo "Passphrase length is ${#PASSPHRASE}";
-  $KEY_FILE=$(mktemp)
+  KEY_FILE=$(mktemp)
   (
     trap "rm -f $KEY_FILE" EXIT
 
