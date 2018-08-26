@@ -18,28 +18,50 @@ if [ ! -z "$DEBUG_KEY_NAME" ]; then
     docker-compose logs -t
   )
 else
-  # When deployment is from travis, connect to all destinations with the keys
-  # we have, and attempt to do deploy
+  # When deployment is from travis, connect to destination, get credentials,
+  # and decrypt them using secure variables mechanism
   [ ! -z "$TRAVIS" ]
   [ ! -z "$ENV" ]
-  KEYS=$(cd keys && ls *.key | sort)
-  for KEY in $KEYS; do
-    echo "Attempting to use key $KEY to deploy on $BASE_DOMAIN..."
-    # Ideally server fingerprint would be delivered together with client
-    # certificate, but I could not figure out how to do so in one file,
-    # and two files are too annoying.
+  CREDENTIALS="$(curl --silent --fail --show-error $BASE_DOMAIN:8080)"
+  KEY="$(echo "$CREDENTIALS" | jq -r '.key')"
+  SECURE_PASSWORD="$(echo "$CREDENTIALS" | jq -r '.secure_password')"
+  PASSPHRASE_VAR_NAME="TRAVIS_PASSWORD_$(echo "$CREDENTIALS" | jq -r '.secure_password_name')"
+
+  echo "Using passphrase from var $PASSPHRASE_VAR_NAME";
+  PASSPHRASE="${!PASSPHRASE_VAR_NAME}";
+  if [ -z "$PASSPHRASE" ]; then
+    echo "$PASSPHRASE_VAR_NAME is unset!";
+    echo "If the server was redeployed, add the following to secure variables section:"
+    echo "  # Password to decrypt $PASSPHRASE_VAR_NAME ($ENV)"
+    echo "  - secure: \"$SECURE_PASSWORD\""
+    false
+  fi
+
+  echo "Passphrase length is ${#PASSPHRASE}";
+  $KEY_FILE=$(mktemp)
+  (
+    trap "rm -f $KEY_FILE" EXIT
+
+    base64 -d < <(echo "$KEY") > $KEY_FILE
+    if ! ssh-keygen -o -p -P "$PASSPHRASE" -N "" -f "$KEY_FILE"; then
+      echo "Failed to unlock key";
+      false
+    fi;
+
+    echo "Attempting to use the key to deploy on $BASE_DOMAIN..."
+    # Ideally server fingerprint would be delivered in archive
+    # together with client certificate, but I was too lazy.
     # There isn't an attack surface here anyway, as we are just pushing
     # the code.
     if \
       ssh -oStrictHostKeyChecking=no \
-        -i "./keys/$KEY" \
+        -i "$KEY_FILE" \
         "travis@$BASE_DOMAIN" \
         "$(git rev-parse HEAD)" "$ENV"; \
     then
-      echo "Succeeded deploying with key $KEY"
-      break
+      echo "Succeeded deploying."
     else
-      echo "Failed deploying with key $KEY"
+      echo "Failed deploying."
     fi
-  done
+  )
 fi

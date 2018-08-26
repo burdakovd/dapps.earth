@@ -30,7 +30,7 @@ gem install travis -v 1.8.9 --no-rdoc --no-ri
 # Generate keys for Travis
 # password name is just to avoid collisions in Travis environment variables
 TRAVIS_PASSWORD_NAME="$(openssl rand -hex 8)"
-TRAVIS_KEY=~/travis.key
+TRAVIS_KEY=/root/travis.key
 TRAVIS_PASSWORD="$(openssl rand -base64 48)"
 ssh-keygen \
   -f "$TRAVIS_KEY" \
@@ -67,8 +67,6 @@ echo "Encrypted contents of that variable (only Travis can decrypt this)"
 cat $TRAVIS_KEY.password.enc
 echo "These two secrets need to be committed to repository in order to"
 echo "be able to deploy to this server"
-
-rm $TRAVIS_KEY $TRAVIS_KEY.password.enc
 
 yum install -y git
 
@@ -127,6 +125,31 @@ chmod 555 /home/travis/deploy
 
 touch /var/log/dapps.earth-integrity/deployments.txt
 chown travis /var/log/dapps.earth-integrity/deployments.txt
+
+# Serve credentials for Travis
+# Again, it is OK that we serve them publicly. They are supposed to be public.
+# Only Travis build can decrypt them.
+
+echo "
+{
+  \"key\": \"$(base64 -w0 < $TRAVIS_KEY)\",
+  \"secure_password\": $(cat $TRAVIS_KEY.password.enc),
+  \"secure_password_name\": \"$TRAVIS_PASSWORD_NAME\"
+}
+" > /home/travis/credentials
+
+yum install -y nc
+echo '
+#!/bin/bash
+while true; do
+  (echo -e "HTTP/1.1 200 OK\n" && cat /home/travis/credentials) | nc -l 0.0.0.0 8080 >/dev/null
+done
+' > /home/travis/serve_credentials && chmod +x /home/travis/serve_credentials
+
+echo "@reboot travis /home/travis/serve_credentials" > \
+  /etc/cron.d/serve_travis_credentials
+
+(su travis -c /home/travis/serve_credentials &) &
 
 # Create maintainer user
 
