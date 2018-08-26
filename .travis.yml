@@ -6,9 +6,8 @@ env:
     - secure: "dJiBjpvANEau/j36Fp5/XX1L5jBRT9wPE7tHZMO1enqmOFoAVgi2WS1d40ZqAlqJRFmlQBmMHPZDFmOyH7KLPmrCDg7jxN/GcoTN/zxufUnRx6hCYhy3e0uo6MAOSlET+IUzTkP465HnD4+WbwNueHYLYLwjHqSt9Lr3sgf34+nAIoTxw7xPwjgf/TrqKQpwspfAxFNFZkvivSZXioCOucWEhlxmXd38179BVV/xz8HX6D6Bb5rRU8JpjR1cjaWLHPi3bGSjNUTMssDeB2alH/lczzzXHFZb3wmu+jO4ohe//vcJscwvOpe98nA8Zl5STrrIKP7Hs7JcaYC8zJnEDfEeIzXnU/lDPhHO1k6uLrdtqJ9ZycuBFNZ6oCRLSVrXMOQnEjMAkV9STuqLIrSyzWKpUG004txQ4RwbLo7OdRgJZhs2WMTm4knaDg4dEDFCc5pkK6Xk4aRlvOLReN9MiBU4wAVkQXgCfLx/KDYZJcr1fAcplJFB5e5g6QyWuJNosPxDF3/fuOhUxHP06HYCJhm3cbPfxODutQF49PcuHiK9cKGnJdYOCXDX7RunI5pp3/27uFA+ZwnhegiNnRVnaPOLYNKBT84gRWMgX+PQYtTVKzRQ0SG/Q4GV18RaIVG9eHIKqbeR3gRM7HGha1+yFrelQJqcqUkfG07rj9glnhM="
 
 script:
- - #docker-compose pull
- - #docker-compose build
- - true
+ - docker-compose pull
+ - docker-compose build
 
 after_success:
   - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ];
