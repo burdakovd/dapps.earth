@@ -3,7 +3,14 @@
 date
 
 # Basic set up
-# TODO: add swap
+dd if=/dev/zero of=/mnt/swap count=2048 bs=1MiB
+chmod 600 /mnt/swap
+mkswap /mnt/swap
+echo '/mnt/swap none swap defaults 0 0' >> /etc/fstab
+swapon -a
+free
+
+# Docker
 yum update -y
 yum install -y docker htop
 usermod -a -G docker ec2-user
@@ -14,6 +21,8 @@ service docker start
 chkconfig docker on
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose --version
+
+# Travis
 
 yum install -y ruby ruby-devel libffi-devel gcc
 gem install travis -v 1.8.9 --no-rdoc --no-ri
@@ -44,5 +53,49 @@ echo "These two secrets need to be committed to repository in order to"
 echo "be able to deploy to this server"
 
 rm $TRAVIS_KEY $TRAVIS_KEY.password.enc
+
+yum install -y git
+
+adduser --gid docker -m travis
+mkdir /home/travis/.ssh
+( \
+  echo -n \
+    'command="/home/travis/deploy",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty ' && \
+    cat $TRAVIS_KEY.pub \
+) > /home/travis/.ssh/authorized_keys
+chmod 400 /home/travis/.ssh/authorized_keys
+chmod 500 /home/travis/.ssh/
+chown -R travis /home/travis/.ssh/
+
+cat << 'EOF' > /home/travis/deploy
+#!/bin/bash -e
+
+echo "Connection: $SSH_CONNECTION"
+COMMIT="$SSH_ORIGINAL_COMMAND"
+echo "Commit: $COMMIT"
+
+WORKDIR=$(mktemp -d)
+echo "Working directory: $WORKDIR"
+
+[ ! -z "$COMMIT" ]
+
+(
+  trap "cd; rm -rf $WORKDIR; echo cleaned up temp directory" EXIT
+
+  cd $WORKDIR
+  mkdir dapps.earth
+  cd dapps.earth
+  git init
+  git remote add origin https://github.com/burdakovd/dapps.earth.git
+  git fetch origin "$COMMIT"
+  git reset --hard FETCH_HEAD
+  echo "current commit: $(git rev-parse HEAD)"
+  docker-compose up --build --remove-orphans -d
+)
+
+echo "Success!"
+EOF
+
+chmod 555 /home/travis/deploy
 
 # Create monitor user
