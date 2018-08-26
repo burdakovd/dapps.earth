@@ -113,6 +113,8 @@ echo "Working directory: $WORKDIR"
   echo "current commit: $(git rev-parse HEAD)"
   . $ENV
   docker-compose up --build --remove-orphans -d
+  # Sad story, but the output is less messed up in this case
+  sleep 5
 )
 
 echo "Success!"
