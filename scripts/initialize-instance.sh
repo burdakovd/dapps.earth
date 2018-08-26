@@ -76,7 +76,7 @@ adduser --gid docker -m travis
 mkdir /home/travis/.ssh
 ( \
   echo -n \
-    'command="/home/travis/deploy",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty ' && \
+    'command="/home/travis/deploy",restrict ' && \
     cat $TRAVIS_KEY.pub \
 ) > /home/travis/.ssh/authorized_keys
 chmod 400 /home/travis/.ssh/authorized_keys
@@ -86,14 +86,16 @@ chown -R travis /home/travis/.ssh/
 cat << 'EOF' > /home/travis/deploy
 #!/bin/bash -e
 
-echo "Connection: $SSH_CONNECTION"
+echo "[$(date)] Received command $SSH_ORIGINAL_COMMAND from [${SSH_CONNECTION}]" \
+  | tee -a /var/log/dapps.earth-integrity/deployments.txt
 
 [[ "$SSH_ORIGINAL_COMMAND" =~ ^[a-z0-9]+\ \.env(\.[a-z]+)?$ ]]
 COMMIT=$(echo "$SSH_ORIGINAL_COMMAND" | cut -f1 -d' ')
 ENV=$(echo "$SSH_ORIGINAL_COMMAND" | cut -f2 -d' ')
 
-echo "Commit: $COMMIT"
-echo "Env: $ENV"
+# TODO: send logs to cloudwatch
+echo "[$(date)] Attempt to deploy ${ENV}:${COMMIT} from [${SSH_CONNECTION}]" \
+  | tee -a /var/log/dapps.earth-integrity/deployments.txt
 
 WORKDIR=$(mktemp -d)
 echo "Working directory: $WORKDIR"
@@ -117,9 +119,58 @@ echo "Working directory: $WORKDIR"
   sleep 5
 )
 
-echo "Success!"
+echo "[$(date)] Deployed ${ENV}:${COMMIT} from [${SSH_CONNECTION}]" \
+  | tee -a /var/log/dapps.earth-integrity/deployments.txt
 EOF
 
 chmod 555 /home/travis/deploy
 
-# Create monitor user
+touch /var/log/dapps.earth-integrity/deployments.txt
+chown travis /var/log/dapps.earth-integrity/deployments.txt
+
+# Create maintainer user
+
+if [ ! -z "$MAINTAINER_KEY" ]; then
+  echo "Setting up unprivileged maintenance access for $MAINTAINER_KEY"
+  adduser -m maintainer
+  mkdir /home/maintainer/.ssh
+  ( \
+    echo -n \
+      'command="/home/maintainer/maintain",restrict,pty ' && \
+      echo "$MAINTAINER_KEY" maintainer \
+  ) > /home/maintainer/.ssh/authorized_keys
+  tail -vn +1 /home/maintainer/.ssh/authorized_keys
+  [ $(wc -l < /home/maintainer/.ssh/authorized_keys) -eq "1" ]
+  chmod 400 /home/maintainer/.ssh/authorized_keys
+  chmod 500 /home/maintainer/.ssh/
+  chown -R maintainer /home/maintainer/.ssh/
+  cat << 'EOF' > /home/maintainer/maintain
+#!/bin/sh
+
+echo "[$(date)] Received command $SSH_ORIGINAL_COMMAND" \
+  | tee -a /var/log/dapps.earth-integrity/maintenance.txt
+
+# TODO: send command and connection details to cloudwatch
+
+case "$SSH_ORIGINAL_COMMAND" in
+    "top -s")
+        top -s
+        ;;
+    "df -h")
+        df -h
+        ;;
+    "free")
+        free
+        ;;
+    *)
+        echo "[$(date)] Denied command $SSH_ORIGINAL_COMMAND" \
+          | tee -a /var/log/dapps.earth-integrity/maintenance.txt
+        exit 1
+        ;;
+esac
+EOF
+
+  chmod 555 /home/maintainer/maintain
+  touch /var/log/dapps.earth-integrity/maintenance.txt
+  chown maintainer /var/log/dapps.earth-integrity/maintenance.txt
+fi
