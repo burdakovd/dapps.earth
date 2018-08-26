@@ -32,7 +32,7 @@ else
   if [ -z "$PASSPHRASE" ]; then
     echo "$PASSPHRASE_VAR_NAME is unset!";
     echo "If the server was redeployed, add the following to secure variables section:"
-    echo "  # Password to decrypt $PASSPHRASE_VAR_NAME ($ENV)"
+    echo "  # $PASSPHRASE_VAR_NAME (to deploy $ENV)"
     echo "  - secure: \"$SECURE_PASSWORD\""
     false
   fi
