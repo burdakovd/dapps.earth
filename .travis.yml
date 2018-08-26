@@ -38,3 +38,8 @@ after_success:
       export ENV=.env.staging;
       (. $ENV && ./scripts/deploy.sh);
     fi
+  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ];
+    then
+      export ENV=.env;
+      (. $ENV && ./scripts/deploy.sh);
+    fi
