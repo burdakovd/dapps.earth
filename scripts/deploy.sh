@@ -37,9 +37,9 @@ else
         "$(git rev-parse HEAD)" "$ENV"; \
     then
       echo "Succeeded deploying with key $KEY"
+      break
     else
       echo "Failed deploying with key $KEY"
-      break
     fi
   done
 fi
