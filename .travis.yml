@@ -1,25 +1,39 @@
 DOCKER_COMPOSE_VERSION: 1.22.0
 
 env:
-  # staging deployment passphrase (for key 627acbd0c2b25992)
-  - secure: n8F1mV21D3vwfkjI1+s1AYhJJ7gAAgp0NwUbgp1An5ezG/1fNf0mcrN4n/mXVKKjkYKUasNwFkRzr7c4zYQRH6LBt+lIaLjw1k9BMBADbalRnXK3ipO+0s+i0Xd9qPLGkiOVM9Hl24lcj
-QNDeCXyH9FfPYHokcCBk88SbE5z7IYnChajybh0T7owv7oJPbOMVwjGaNranjlzGys4aG7ADpCcfRlyLKX/p8wjxXMXYB5Hue6H3vqGpSm+b/klhuOHh9WmowLGC2hYp+mmGaAGGgDdm/R
-m4A5EbpTm8VJMoi2REwgkrZWFsG3EE/IJmCOUKUA8GyeRB7yd3gbe9Lnp24GfXmNH/PEcQRFZaVbps4EkYaWCDmDULb2vvxUgc7zdGoOVtqjpKb1Hg79Jjr7z0VnALGjGI8JWFhLihQT/g
-LyFufHbh/y1uXbiRuFdsULU5KPNm5b4co1BDblJ88KZCCbnDC/exMN01ycgOhCjn0qfjQSfp6yDMfa+I1nnKOTtHNhqXnbrqnxi4YddIzaSXBgTBtthfiLaocDBv9qG/DKeroDhe9KjWD6
-I3WcUpqLOep0bbrB9IB87CDBecMFUQHFwcEotfyl6iBIRY9YDfLs2CzeBCN76YaSd0JmBDcNL7wAMDDBUFW4nbY8kCktlDyNOCbDWiWMNae6fmTx0wqw=
+  global:
+    # Password to decrypt key f1e8c3421e05855e
+    - secure: "dJiBjpvANEau/j36Fp5/XX1L5jBRT9wPE7tHZMO1enqmOFoAVgi2WS1d40ZqAlqJRFmlQBmMHPZDFmOyH7KLPmrCDg7jxN/GcoTN/zxufUnRx6hCYhy3e0uo6MAOSlET+IUzTkP465HnD4+WbwNueHYLYLwjHqSt9Lr3sgf34+nAIoTxw7xPwjgf/TrqKQpwspfAxFNFZkvivSZXioCOucWEhlxmXd38179BVV/xz8HX6D6Bb5rRU8JpjR1cjaWLHPi3bGSjNUTMssDeB2alH/lczzzXHFZb3wmu+jO4ohe//vcJscwvOpe98nA8Zl5STrrIKP7Hs7JcaYC8zJnEDfEeIzXnU/lDPhHO1k6uLrdtqJ9ZycuBFNZ6oCRLSVrXMOQnEjMAkV9STuqLIrSyzWKpUG004txQ4RwbLo7OdRgJZhs2WMTm4knaDg4dEDFCc5pkK6Xk4aRlvOLReN9MiBU4wAVkQXgCfLx/KDYZJcr1fAcplJFB5e5g6QyWuJNosPxDF3/fuOhUxHP06HYCJhm3cbPfxODutQF49PcuHiK9cKGnJdYOCXDX7RunI5pp3/27uFA+ZwnhegiNnRVnaPOLYNKBT84gRWMgX+PQYtTVKzRQ0SG/Q4GV18RaIVG9eHIKqbeR3gRM7HGha1+yFrelQJqcqUkfG07rj9glnhM="
 
 script:
- - docker-compose pull
- - docker-compose build
+ - #docker-compose pull
+ - #docker-compose build
+ - true
 
 after_success:
-  - if [ \
-      "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" != false ] \
-    ]; then
+  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ];
+    then
       for ENC_KEY in $(cd keys && ls *.enc); do
-        PASSPHRASE_VAR_NAME="TRAVIS_PASSWORD_${ENC_KEY%.enc}"
-        ssh-keygen -p -P ${!PASSPHRASE_VAR_NAME} -N "" keys/$ENC_KEY &&
-          mv keys/$ENC_KEY keys/${ENC_KEY%.enc}.key
-      done
+        chmod 600 "keys/$ENC_KEY";
+        KEY=${ENC_KEY%.enc}
+        PASSPHRASE_VAR_NAME="TRAVIS_PASSWORD_$KEY";
+        echo "Using passphrase from var $PASSPHRASE_VAR_NAME";
+        PASSPHRASE="${!PASSPHRASE_VAR_NAME}";
+        if [ -z "$PASSPHRASE" ]; then
+          echo "$PASSPHRASE_VAR_NAME is unset!";
+        else
+          echo "Passphrase length is ${#PASSPHRASE}";
+          if ssh-keygen -o -p -P "$PASSPHRASE" -N "" -f "keys/$ENC_KEY"; then
+            mv "keys/$ENC_KEY" "keys/$KEY.key";
+            echo "Unlocked keys/$ENC_KEY into keys/$KEY.key";
+          else
+            echo "Failed to unlock keys/$ENC_KEY";
+          fi;
+        fi;
+      done;
     fi
-  - export ENV=.env.staging; (. $ENV && ./scripts/deploy.sh)
+  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ];
+    then
+      export ENV=.env.staging;
+      (. $ENV && ./scripts/deploy.sh);
+    fi

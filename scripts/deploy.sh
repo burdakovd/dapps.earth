@@ -22,11 +22,19 @@ else
   # we have, and attempt to do deploy
   [ ! -z "$TRAVIS" ]
   [ ! -z "$ENV" ]
-  KEYS=$(cd keys && echo *.key | sort)
+  KEYS=$(cd keys && ls *.key | sort)
   for KEY in $KEYS; do
     echo "Attempting to use key $KEY to deploy on $BASE_DOMAIN..."
+    # Ideally server fingerprint would be delivered together with client
+    # certificate, but I could not figure out how to do so in one file,
+    # and two files are too annoying.
+    # There isn't an attack surface here anyway, as we are just pushing
+    # the code.
     if \
-      ssh -i ./keys/$KEY.key travis@$BASE_DOMAIN $(git rev-parse HEAD) $ENV; \
+      ssh -oStrictHostKeyChecking=no \
+        -i "./keys/$KEY" \
+        "travis@$BASE_DOMAIN" \
+        "$(git rev-parse HEAD)" "$ENV"; \
     then
       echo "Succeeded deploying with key $KEY"
     else

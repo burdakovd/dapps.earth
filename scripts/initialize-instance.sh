@@ -37,12 +37,28 @@ ssh-keygen \
   -N "$TRAVIS_PASSWORD" \
   -t ecdsa -b 521 -o -a 256
 chmod 600 $TRAVIS_KEY
-HOME=/root travis encrypt -r burdakovd/dapps.earth \
+export HOME=/root
+# Apparently Travis has annoying migration of all repositories to pro accounts,
+# and encryption logic isn't migrated well yet, and at the moment in order
+# to encrypt data for pro project (even an open source one), one has to have
+# a travis pro account.
+# So this token gives access to an empty Github account that is authenticated
+# agains Travis Pro (no payment plan, just regular account).
+# The token gives read access to all private repositories of the account
+# (which this account has none), so it is safe to hardcode it here.
+# This is a mess, and Github deactivates it if finds it as cleartext in
+# public repository, so here we do a little bit of encryption.
+travis login --pro --github-token $(
+  echo U2FsdGVkX18FzRWMB/gCSkqljed4wAOwBY0eo+pDi0kK5249quoqXTtBh5Ln0bGN7jvLjfSlk6foxuTf8iINCQ== | \
+    openssl aes-256-cbc -pass pass:1234 -a -d
+)
+travis encrypt -r burdakovd/dapps.earth --pro \
   "TRAVIS_PASSWORD_$TRAVIS_PASSWORD_NAME=$TRAVIS_PASSWORD" > \
   $TRAVIS_KEY.password.enc
+rm -rf ~/.travis
 TRAVIS_PASSWORD=""
 
-echo Here are the credentials for Travis to log in and deploy code.
+echo "Here are the credentials for Travis to log in and deploy code."
 echo "Encrypted private key (requires password to decrypt)"
 cat $TRAVIS_KEY
 echo "Name of environment variable that will contain password during Travis run:"
@@ -79,8 +95,6 @@ ENV=$(echo "$SSH_ORIGINAL_COMMAND" | cut -f2 -d' ')
 echo "Commit: $COMMIT"
 echo "Env: $ENV"
 
-. $ENV
-
 WORKDIR=$(mktemp -d)
 echo "Working directory: $WORKDIR"
 
@@ -97,6 +111,7 @@ echo "Working directory: $WORKDIR"
   git fetch origin "$COMMIT"
   git reset --hard FETCH_HEAD
   echo "current commit: $(git rev-parse HEAD)"
+  . $ENV
   docker-compose up --build --remove-orphans -d
 )
 
