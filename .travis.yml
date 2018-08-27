@@ -17,27 +17,6 @@ script:
 after_success:
   - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ];
     then
-      for ENC_KEY in $(cd keys && ls *.enc); do
-        chmod 600 "keys/$ENC_KEY";
-        KEY=${ENC_KEY%.enc}
-        PASSPHRASE_VAR_NAME="TRAVIS_PASSWORD_$KEY";
-        echo "Using passphrase from var $PASSPHRASE_VAR_NAME";
-        PASSPHRASE="${!PASSPHRASE_VAR_NAME}";
-        if [ -z "$PASSPHRASE" ]; then
-          echo "$PASSPHRASE_VAR_NAME is unset!";
-        else
-          echo "Passphrase length is ${#PASSPHRASE}";
-          if ssh-keygen -o -p -P "$PASSPHRASE" -N "" -f "keys/$ENC_KEY"; then
-            mv "keys/$ENC_KEY" "keys/$KEY.key";
-            echo "Unlocked keys/$ENC_KEY into keys/$KEY.key";
-          else
-            echo "Failed to unlock keys/$ENC_KEY";
-          fi;
-        fi;
-      done;
-    fi
-  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ];
-    then
       export ENV=.env.staging;
       (. $ENV && ./scripts/deploy.sh);
     fi
