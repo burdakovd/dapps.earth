@@ -27,7 +27,12 @@
           },
         ).then(
           function(text) {
-            el.innerHTML = (new showdown.Converter()).makeHtml(text);
+            el.innerHTML = (new showdown.Converter()).makeHtml(
+              text.replace(
+                /https:\/\/dapps\.earth/g,
+                'https://' + window.location.hostname,
+              ),
+            );
           }
         );
       })
