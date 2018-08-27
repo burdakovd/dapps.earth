@@ -29,5 +29,7 @@ RUN rm -rf /var/www/ && mkdir /var/www
 COPY html /var/www/static
 COPY README.md /var/www/static/README.md
 
+VOLUME /var/log/dapps.earth-integrity
+
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 CMD ["./start.sh"]

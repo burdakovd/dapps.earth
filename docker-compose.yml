@@ -21,6 +21,7 @@ services:
       - BASE_DOMAIN
     volumes:
       - certs:/etc/nginx/certs:ro
+      - /var/log/dapps.earth-integrity:/var/log/dapps.earth-integrity:ro
     ports:
       - "80:8080"
       - "443:443"
