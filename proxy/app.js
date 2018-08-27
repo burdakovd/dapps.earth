@@ -23,7 +23,7 @@ var handlers = {
     if (path === '/') {
       res.writeHead(
         302,
-        {'Location': 'https://github.com/burdakovd/hshca-proxy'},
+        {'Location': 'https://dapps.earth/'},
       );
       res.end('')
       return;
@@ -41,7 +41,7 @@ var handlers = {
     var subPath = matches[2]
     const CIDv1 = cid.toV1();
     const CIDv1base32 = CIDv1.toBaseEncodedString('base32');
-    var newDestination = HAS_SSL ? 'https://' : 'http://' +
+    var newDestination = (HAS_SSL ? 'https://' : 'http://') +
       CIDv1base32 + '.' + req.headers.host + subPath;
     res.writeHead(302, {'Location': newDestination});
     res.end('')
@@ -56,7 +56,7 @@ var handlers = {
       res,
       {
         target:
-          'https://gateway.ipfs.io/ipfs/' + backendCID.toBaseEncodedString(),
+          'http://ipfs:8080/ipfs/' + backendCID.toBaseEncodedString(),
         changeOrigin: true,
       },
     )

@@ -10,8 +10,10 @@ services:
     restart: always
     build: proxy
     environment:
-     - BASE_DOMAIN
-     - HAS_SSL=1
+      - BASE_DOMAIN
+      - HAS_SSL=1
+    depends_on:
+      - ipfs
   frontend:
     restart: always
     build:
@@ -54,9 +56,17 @@ services:
       - "53:53/udp"
     volumes:
       - acme-dns-data:/var/lib/acme-dns
+  ipfs:
+    restart: always
+    build: ipfs
+    ports:
+      - "4001:4001"
+    volumes:
+      - ipfs-data:/data/ipfs
 
 volumes:
   acme-dns-data:
   ssl-renewer-auth:
   ssl-renewer-successes:
   certs:
+  ipfs-data:
