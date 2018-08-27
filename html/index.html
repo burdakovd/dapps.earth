@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+  <head>
+    <title>dapps.earth</title>
+    <link rel="icon" type="image/png" href="/favicon.png?v=2" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.8.6/showdown.min.js" crossorigin async ></script>
+    <link rel="preload" href="/README.md" as="fetch" type="text/plain" crossorigin>
+    <link rel="preload" href="/icon300.png" as="image" type="image/png" crossorigin>
+  </head>
+  <body>
+    <p id="root">Waiting for scripts to load.</p>
+    <script type="text/javascript">
+      window.addEventListener("load", function() {
+        const el = document.querySelector('#root');
+        el.innerHTML = 'Loading content...';
+        fetch('/README.md').then(
+          function(response) {
+            if (response.ok) {
+              return response.text();
+            } else {
+              return 'failed';
+            }
+          },
+        ).then(
+          function(text) {
+            el.innerHTML = (new showdown.Converter()).makeHtml(text);
+          }
+        );
+      })
+    </script>
+  </body>
+</html>

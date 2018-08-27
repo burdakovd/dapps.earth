@@ -22,8 +22,12 @@ RUN cd /tmp && \
 VOLUME /etc/nginx/certs
 
 WORKDIR /root
-COPY start.sh ./
-COPY nginx-template.conf /etc/nginx/nginx-template.conf
+COPY nginx/start.sh ./
+COPY nginx/nginx-template.conf /etc/nginx/nginx-template.conf
+
+RUN rm -rf /var/www/ && mkdir /var/www
+COPY html /var/www/static
+COPY README.md /var/www/static/README.md
 
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 CMD ["./start.sh"]

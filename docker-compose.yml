@@ -14,7 +14,9 @@ services:
      - HAS_SSL=1
   frontend:
     restart: always
-    build: nginx
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
     environment:
       - BASE_DOMAIN
     volumes:
