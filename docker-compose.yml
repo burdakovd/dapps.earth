@@ -3,7 +3,6 @@ version: '3'
 # Need to provide the following environment variables when running:
 # - BASE_DOMAIN (accessible to target audience, not necessarily public internet)
 # - NS_DOMAIN (accessible to public internet)
-# - ADMIN_EMAIL
 
 services:
   proxy:
