@@ -22,7 +22,7 @@ ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/8080
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
 ipfs config Datastore.StorageMax 2GB
-ipfs config --json Discovery.MDNS false
+ipfs config --json Discovery.MDNS.Enabled false
 ipfs config Gateway.RootRedirect https://dapps.earth/
 ipfs config --json Swarm.DisableNatPortMap false
 
