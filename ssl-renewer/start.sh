@@ -113,12 +113,12 @@ while true; do
       else
         echo "Renewal for $HOSTS failed!"
         nanodns_stop
-        sleep 3600 & wait $!
+        sleep 86400 & wait $!
       fi
     else
       echo "Skipping certificate request for $HOSTS as it is fresh enough"
       nanodns_stop
-      sleep 3600 & wait $!
+      sleep 86400 & wait $!
     fi
   else
     echo "Skipping certificate request for $HOSTS as DNS is not configured"
