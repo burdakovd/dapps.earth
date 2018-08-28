@@ -121,6 +121,7 @@ if [ ! -z "$ELASTIC_IP" ]; then
     --public-ip "$ELASTIC_IP" \
     --allow-reassociation
   ssh-keygen -R "$ELASTIC_IP"
+  . $DEPLOY_ENV && ssh-keygen -R "$BASE_DOMAIN"
 fi
 
 ip=$(aws ec2 describe-instances \
