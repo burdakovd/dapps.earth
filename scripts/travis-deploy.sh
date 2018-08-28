@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-ENV="$1"
+export ENV="$1"
 
 [ ! -z "$ENV" ]
 
