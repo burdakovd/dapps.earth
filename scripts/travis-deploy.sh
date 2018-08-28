@@ -6,8 +6,7 @@ $ENV="$1"
 
 . "$ENV"
 
-if [ "$TRAVIS_BRANCH" = "$BRANCH" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ];
-then
+if true || [ "$TRAVIS_BRANCH" = "$BRANCH" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
   ./scripts/deploy.sh;
 else
   echo "Skipping deployment for $ENV:"
