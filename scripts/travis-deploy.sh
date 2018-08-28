@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -e
 
 export ENV="$1"
 
@@ -6,7 +6,7 @@ export ENV="$1"
 
 . "$ENV"
 
-if true || [ "$TRAVIS_BRANCH" = "$BRANCH" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+if [ "$TRAVIS_BRANCH" = "$BRANCH" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
   ./scripts/deploy.sh $(git rev-parse HEAD);
 else
   echo "Skipping deployment for $ENV:"
