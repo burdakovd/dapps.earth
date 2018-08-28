@@ -81,43 +81,52 @@ chmod 400 /home/travis/.ssh/authorized_keys
 chmod 500 /home/travis/.ssh/
 chown -R travis /home/travis/.ssh/
 
-cat << 'EOF' > /home/travis/deploy
+[ ! -z $DEPLOY_BRANCH ]
+[ ! -z $DEPLOY_ENV ]
+
+cat << EOF > /home/travis/deploy
 #!/bin/bash -e
 
-echo "[$(date)] Received command $SSH_ORIGINAL_COMMAND from [${SSH_CONNECTION}]" \
+echo "[\$(date)] Received command \$SSH_ORIGINAL_COMMAND from [\$SSH_CLIENT]" \\
   | tee -a /var/log/dapps.earth-integrity/deployments.txt
 
-[[ "$SSH_ORIGINAL_COMMAND" =~ ^[a-z0-9]+\ \.env(\.[a-z]+)?$ ]]
-COMMIT=$(echo "$SSH_ORIGINAL_COMMAND" | cut -f1 -d' ')
-ENV=$(echo "$SSH_ORIGINAL_COMMAND" | cut -f2 -d' ')
+[[ "\$SSH_ORIGINAL_COMMAND" =~ ^[a-z0-9]+\$ ]]
+COMMIT="\$SSH_ORIGINAL_COMMAND"
 
 # TODO: send logs to cloudwatch
-echo "[$(date)] Attempt to deploy ${ENV}:${COMMIT} from [${SSH_CONNECTION}]" \
+echo "[\$(date)] Attempt to deploy \$COMMIT from [\$SSH_CLIENT]" \\
   | tee -a /var/log/dapps.earth-integrity/deployments.txt
 
-WORKDIR=$(mktemp -d)
-echo "Working directory: $WORKDIR"
+WORKDIR=\$(mktemp -d)
+echo "Working directory: \$WORKDIR"
 
-[ ! -z "$COMMIT" ]
+[ ! -z "\$COMMIT" ]
 
 (
-  trap "cd; rm -rf $WORKDIR; echo cleaned up temp directory" EXIT
+  trap "cd; rm -rf \$WORKDIR" EXIT
 
-  cd $WORKDIR
+  cd \$WORKDIR
   mkdir dapps.earth
   cd dapps.earth
   git init
   git remote add origin https://github.com/burdakovd/dapps.earth.git
-  git fetch origin "$COMMIT"
+  git fetch origin "$DEPLOY_BRANCH"
   git reset --hard FETCH_HEAD
-  echo "current commit: $(git rev-parse HEAD)"
-  . $ENV
+  LATEST_COMMIT=\$(git rev-parse HEAD)
+  echo "latest commit in branch $DEPLOY_BRANCH: \$LATEST_COMMIT"
+  if [ ! "\$COMMIT" = "\$LATEST_COMMIT" ]; then
+    echo "[\$(date)] Refused to deploy \$COMMIT from [\$SSH_CLIENT] because latest in $DEPLOY_BRANCH is \$LATEST_COMMIT" \
+      | tee -a /var/log/dapps.earth-integrity/deployments.txt
+    false
+  fi
+
+  . $DEPLOY_ENV
   docker-compose up --build --remove-orphans -d
   # Sad story, but the output is less messed up in this case
   sleep 5
 )
 
-echo "[$(date)] Deployed ${ENV}:${COMMIT} from [${SSH_CONNECTION}]" \
+echo "[$(date)] Deployed $DEPLOY_ENV from \$COMMIT from [\$SSH_CLIENT]" \\
   | tee -a /var/log/dapps.earth-integrity/deployments.txt
 EOF
 

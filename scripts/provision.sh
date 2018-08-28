@@ -3,10 +3,11 @@
 # Launch a new instance on AWS, attach existing or new elastic IP to it
 
 [ ! -z "$SECURITY_GROUP" ]
+[ ! -z "$DEPLOY_ENV" ]
 
-# 1. Launch instance
-# 2. Make it run start up script
-# 3. Configure firewall
+export DEPLOY_BRANCH=$(. $DEPLOY_ENV && echo $BRANCH)
+
+[ ! -z "$DEPLOY_BRANCH" ]
 
 AMI_AMAZON_LINUX2=ami-04681a1dbd79675a5
 
@@ -40,6 +41,8 @@ instance_id=$(
     echo "bash -o pipefail -c \"\$INIT_SCRIPT_SOURCE\" > /root/dapps.earth-init.sh"
     echo "chmod +x /root/dapps.earth-init.sh"
     echo "mkdir -p /var/log/dapps.earth-integrity"
+    echo "date"
+    echo "echo ''"
     if [ ! -z "$MAINTAINER_KEY" ]; then
       echo "export MAINTAINER_KEY='$MAINTAINER_KEY'"
       echo "(
@@ -47,8 +50,17 @@ instance_id=$(
         echo \"Holder of that key has unprivileged access to the machine\"
         echo \"The key allows basic read-only commands, \"
         echo \"such as df -h, free, top -s, etc.\"
+        echo ''
       ) >> /var/log/dapps.earth-integrity/provision.txt"
     fi
+    echo "export DEPLOY_BRANCH='$DEPLOY_BRANCH'"
+    echo "export DEPLOY_ENV='$DEPLOY_ENV'"
+    echo "(
+      echo \"This machine will accept deployments from Travis for:\"
+      echo \"  - branch: $DEPLOY_BRANCH\"
+      echo \"  - env: $DEPLOY_ENV\"
+      echo ''
+    ) >> /var/log/dapps.earth-integrity/provision.txt"
     if [ ! -z "$DEBUG_KEY_NAME" ]; then
       echo "(
         echo \"This machine has debug key <$DEBUG_KEY_NAME> attached\"
@@ -60,6 +72,7 @@ instance_id=$(
         echo \"Access is restricted to only for Travis deploys\"
       ) >> /var/log/dapps.earth-integrity/provision.txt"
     fi
+    echo "echo ''"
     echo "(
       echo \"Source of init script:\"
       echo \"  \$INIT_SCRIPT_SOURCE\"
