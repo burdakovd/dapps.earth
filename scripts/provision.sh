@@ -82,7 +82,7 @@ instance_id=$(
     --image-id $AMI_AMAZON_LINUX2 \
     --security-group-ids "$SECURITY_GROUP" \
     --count 1 \
-    --instance-type t2.small \
+    --instance-type t2.medium \
     --query 'Instances[0].InstanceId' \
     --user-data file://$USER_DATA \
     $(if [ ! -z "$DEBUG_KEY_NAME" ]; then \
