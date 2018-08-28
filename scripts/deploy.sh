@@ -57,7 +57,7 @@ else
       ssh -oStrictHostKeyChecking=no \
         -i "$KEY_FILE" \
         "travis@$BASE_DOMAIN" \
-        "$(git rev-parse HEAD)" "$ENV"; \
+        "$(git rev-parse HEAD)"; \
     then
       echo "Succeeded deploying."
     else
