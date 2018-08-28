@@ -72,7 +72,7 @@ instance_id=$(
         echo \"Access is restricted to only for Travis deploys\"
       ) >> /var/log/dapps.earth-integrity/provision.txt"
     fi
-    echo "echo ''"
+    echo "echo '' >> /var/log/dapps.earth-integrity/provision.txt"
     echo "(
       echo \"Source of init script:\"
       echo \"  \$INIT_SCRIPT_SOURCE\"
