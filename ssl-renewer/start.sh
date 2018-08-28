@@ -63,6 +63,7 @@ dns_myapi_add() {
 
 dns_myapi_rm() {
   # whole file will be deleted upon DNS start/stop
+  true
 }
 EOF
 
