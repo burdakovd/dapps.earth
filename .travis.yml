@@ -11,8 +11,8 @@ before_install:
   - sudo apt-get install jq
 
 script:
-  - #docker-compose pull
-  - #docker-compose build
+  - docker-compose pull
+  - docker-compose build
 
 after_success:
   - ./scripts/travis-deploy.sh .env.staging
