@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-$ENV="$1"
+ENV="$1"
 
 [ ! -z "$ENV" ]
 
