@@ -16,6 +16,8 @@ from time import sleep
 from dnslib import DNSLabel, QTYPE, RR, dns
 from dnslib.server import DNSServer
 
+VERBOSE=True
+
 def records(name):
     try:
       ff = open(name)
@@ -32,15 +34,18 @@ class Resolver(object):
 
   def resolve(self, request, handler):
     reply = request.reply()
+    zone = '\n'.join(
+        '{} 1 TXT "{}"'.format(
+            request.q.qname,
+            txt.strip(),
+        )
+        for txt in records(self._records_file)
+    )
+    if VERBOSE:
+        sys.stderr.write(repr(zone) + '\n')
     reply.add_answer(
         *RR.fromZone(
-            '\n'.join(
-                '{}. 1 TXT "{}"'.format(
-                    request.q.qname,
-                    txt.strip(),
-                )
-                for txt in records(self._records_file)
-            )
+            zone
         )
     )
     return reply
@@ -71,6 +76,7 @@ if __name__ == '__main__':
 
   with daemon.DaemonContext(
     files_preserve=[server.server.fileno()],
+    stderr=sys.stderr,
   ):
       drop_privileges(user)
       records(records_file)

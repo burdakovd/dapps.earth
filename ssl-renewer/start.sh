@@ -54,16 +54,15 @@ mkdir -p ~/.acme.sh
 cat << EOF > ~/.acme.sh/dns_nano.sh
 #!/bin/bash -e
 
-dns_myapi_add() {
+dns_nano_add() {
   fulldomain="\$1"
   txtvalue="\$2"
   echo \$txtvalue >> $NANODNS_CONFIG
-  return 1
 }
 
-dns_myapi_rm() {
-  # whole file will be deleted upon DNS start/stop
-  true
+dns_nano_rm() {
+  grep -v "\$2" $NANODNS_CONFIG > $NANODNS_CONFIG.f
+  mv $NANODNS_CONFIG.f $NANODNS_CONFIG
 }
 EOF
 
@@ -75,27 +74,25 @@ while true; do
   echo "  acme-dns.$BASE_DOMAIN NS => $NS_DOMAIN"
   echo "  $NS_DOMAIN should resolve to a public IP address of this server"
   nanodns_start
+  TEST_SUB="test-$(date +%s)"
   # Add a test record to later verify that things work well
-  if echo $(echo test-blah-blah-$ACMEDNS_SUBDOMAIN | cut -c1-43) >> $NANODNS_CONFIG; then
-    sleep 120
-    for HOST in $SANITIZED_HOSTS; do
-      echo "    _acme-challenge.$HOST CNAME => challenge.acme-dns.$BASE_DOMAIN"
-      if grep $(echo test-blah-blah-$ACMEDNS_SUBDOMAIN | cut -c1-43) < <(dig txt +short _acme-challenge.$HOST); then
-        echo "      DNS for $HOST seems to be OK"
-      else
-        echo "      DNS for $HOST is not configured correctly"
-        IS_DNS_GOOD=0
-      fi
-    done
-  else
-    echo "Failed to set up test TXT record"
-    IS_DNS_GOOD=0
-  fi
+  echo $TEST_SUB >> $NANODNS_CONFIG
+  sleep 120
+  for HOST in $SANITIZED_HOSTS; do
+    echo "    _acme-challenge.$HOST CNAME => challenge.acme-dns.$BASE_DOMAIN"
+    if grep $TEST_SUB < <(dig txt +short _acme-challenge.$HOST) >/dev/null; then
+      echo "      DNS for $HOST seems to be OK"
+    else
+      echo "      DNS for $HOST is not configured correctly"
+      IS_DNS_GOOD=0
+    fi
+  done
 
   if [ "$IS_DNS_GOOD" -eq "1" ]; then
     if ! is_fresh "$HOSTS"; then
       echo "Making certificate request for $HOSTS..."
       acme.sh \
+        --debug \
         --force \
         --issue \
         --dns dns_nano \
@@ -115,10 +112,12 @@ while true; do
         record_success "$HOSTS"
       else
         echo "Renewal for $HOSTS failed!"
+        nanodns_stop
         sleep 3600 & wait $!
       fi
     else
       echo "Skipping certificate request for $HOSTS as it is fresh enough"
+      nanodns_stop
       sleep 3600 & wait $!
     fi
   else
