@@ -11,17 +11,9 @@ before_install:
   - sudo apt-get install jq
 
 script:
- - docker-compose pull
- - docker-compose build
+  - docker-compose pull
+  - docker-compose build
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ];
-    then
-      export ENV=.env.staging;
-      (. $ENV && ./scripts/deploy.sh);
-    fi
-  - if [ "$TRAVIS_BRANCH" = "master" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ];
-    then
-      export ENV=.env;
-      (. $ENV && ./scripts/deploy.sh);
-    fi
+  - ./scripts/travis-deploy.sh .env.staging
+  - ./scripts/travis-deploy.sh .env
