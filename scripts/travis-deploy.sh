@@ -7,7 +7,7 @@ $ENV="$1"
 . "$ENV"
 
 if true || [ "$TRAVIS_BRANCH" = "$BRANCH" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-  ./scripts/deploy.sh;
+  ./scripts/deploy.sh $(git rev-parse HEAD);
 else
   echo "Skipping deployment for $ENV:"
   echo "  - current branch is $TRAVIS_BRANCH (pull request: $TRAVIS_PULL_REQUEST)"
