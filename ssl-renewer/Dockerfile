@@ -10,21 +10,17 @@ RUN \
     sha256sum -c - && \
   chmod 755 /usr/local/bin/dumb-init
 
-RUN cd /tmp && \
-  git clone https://github.com/mrako/wait-for.git && \
-  cd wait-for && \
-  git checkout d9699cb9fe8a4622f05c4ee32adf2fd93239d005 && \
-  cp -v wait-for /bin/ && \
-  cd /tmp && \
-  rm -r /tmp/wait-for
-
 FROM neilpang/acme.sh
 
-RUN apk update && apk add bash jq bc bind-tools
+RUN apk update && apk add bash bc bind-tools python2 py-pip git
+
+RUN pip install docutils && pip install python-daemon
+RUN pip install git+git://github.com/paulchakravarti/dnslib.git@986861873ee6131dae60820b8a804f710f87dd8
+RUN addgroup -S nano-dns && adduser -S -G nano-dns nano-dns
 
 COPY --from=0 /usr/local/bin/dumb-init /usr/local/bin/dumb-init
-COPY --from=0 /bin/wait-for /bin/wait-for
 COPY start.sh ./
+COPY nano-dns.py ./
 
 VOLUME /acme-dns-auth
 VOLUME /successes

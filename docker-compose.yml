@@ -34,28 +34,15 @@ services:
     restart: always
     build: ssl-renewer
     environment:
-      - ADMIN_EMAIL
       - BASE_DOMAIN
       - NS_DOMAIN
       - HOSTS=$BASE_DOMAIN *.$BASE_DOMAIN *.ipfs.$BASE_DOMAIN *.eth.swarm.$BASE_DOMAIN
       - MAX_SSL_CERTIFICATE_AGE_DAYS=7
     volumes:
-      - ssl-renewer-auth:/acme-dns-auth
       - ssl-renewer-successes:/successes
       - certs:/etc/nginx/certs
-    depends_on:
-      - acme-dns
-  acme-dns:
-    restart: always
-    build: acme-dns
-    environment:
-      - BASE_DOMAIN
-      - NS_DOMAIN
-      - ADMIN_EMAIL
     ports:
       - "53:53/udp"
-    volumes:
-      - acme-dns-data:/var/lib/acme-dns
   ipfs:
     restart: always
     build: ipfs
@@ -65,8 +52,6 @@ services:
       - ipfs-data:/data/ipfs
 
 volumes:
-  acme-dns-data:
-  ssl-renewer-auth:
   ssl-renewer-successes:
   certs:
   ipfs-data:
