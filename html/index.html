@@ -3,6 +3,15 @@
   <head>
     <title>dapps.earth</title>
     <link rel="icon" type="image/png" href="/favicon.png?v=2" />
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122332887-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-122332887-2');
+    </script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.8.6/showdown.min.js"
       crossorigin="anonymous"
@@ -14,28 +23,19 @@
   <body>
     <p id="root">Waiting for scripts to load.</p>
     <script type="text/javascript">
-      window.addEventListener("load", function() {
-        const el = document.querySelector('#root');
+      window.addEventListener("load", function () {
+        var el = document.querySelector('#root');
         el.innerHTML = 'Loading content...';
-        fetch('/README.md').then(
-          function(response) {
-            if (response.ok) {
-              return response.text();
-            } else {
-              return 'failed';
-            }
-          },
-        ).then(
-          function(text) {
-            el.innerHTML = (new showdown.Converter()).makeHtml(
-              text.replace(
-                /https:\/\/dapps\.earth/g,
-                'https://' + window.location.hostname,
-              ),
-            );
+        fetch('/README.md').then(function (response) {
+          if (response.ok) {
+            return response.text();
+          } else {
+            return 'failed';
           }
-        );
-      })
+        }).then(function (text) {
+          el.innerHTML = new showdown.Converter().makeHtml(text.replace(/https:\/\/dapps\.earth/g, 'https://' + window.location.hostname));
+        });
+      });
     </script>
   </body>
 </html>

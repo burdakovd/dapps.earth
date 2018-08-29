@@ -11,6 +11,6 @@ if [ "$TRAVIS_BRANCH" = "$BRANCH" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ]; the
 else
   echo "Skipping deployment for $ENV:"
   echo "  - current branch is $TRAVIS_BRANCH (pull request: $TRAVIS_PULL_REQUEST)"
-  echo "  - destination accepts $BRANCH only for depoyment, no pull requests"
+  echo "  - destination allows deployments only from branch '$BRANCH'"
   false
 fi

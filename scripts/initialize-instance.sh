@@ -126,7 +126,7 @@ echo "Working directory: \$WORKDIR"
   sleep 5
 )
 
-echo "[$(date)] Deployed $DEPLOY_ENV from \$COMMIT from [\$SSH_CLIENT]" \\
+echo "[\$(date)] Deployed $DEPLOY_ENV from \$COMMIT from [\$SSH_CLIENT]" \\
   | tee -a /var/log/dapps.earth-integrity/deployments.txt
 EOF
 
