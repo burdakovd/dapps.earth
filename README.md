@@ -1,6 +1,7 @@
 # <img src="https://dapps.earth/icon300.png" alt="drawing" width="32" valign="middle"/> dapps.earth: secure IPFS and Swarm gateway
 Server deployment details: [Integrity logs](https://dapps.earth/integrity/), [Travis credentials](https://dapps.earth/travis-credentials/)
-Source code: https://github.com/burdakovd/dapps.earth [![Build Status](https://travis-ci.com/burdakovd/dapps.earth.svg?branch=master)](https://travis-ci.com/burdakovd/dapps.earth)
+
+Source code: [https://github.com/burdakovd/dapps.earth](https://github.com/burdakovd/dapps.earth) [![Build Status](https://travis-ci.com/burdakovd/dapps.earth.svg?branch=master)](https://travis-ci.com/burdakovd/dapps.earth)
 
 ## What?
 
@@ -24,15 +25,15 @@ Mainstream IPFS/Swarm gateways serve _all_ of the content from a single _origin_
 
 IPFS and Swarm have some internal concept of websites, but browsers have no way to know about those, so they just assume the whole gateway is just a giant website with millions of pages, and they let all of the pages interact with each other without any restriction. Arbitrary page can read/modify other pages' cookies, local storage, and even install service worker that will forever be able to intercept all requests to that gateway and respond with any content it wishes (we [dodged the bullet](https://github.com/ipfs/go-ipfs/issues/4025) with service worker due to pure luck)
 
-**dapps.earth** avoids this problem by serving each individual IPFS content ID or Swarm manifest from a separate domain. That way traditional web security still applies. There are nuances around subdomains (browser allow them to share some data with each other), but we are in the process of adding root domains to [Public Suffix List](https://en.wikipedia.org/wiki/Public_Suffix_List) so that browsers know that `a.ipfs.dapps.earth` trusts `b.ipfs.dapps.earth`, despite them being
+**dapps.earth** avoids this problem by serving each individual IPFS content ID or Swarm manifest from a separate domain. That way traditional web security still applies. There are nuances around subdomains (browser allow them to share some data with each other), but we are in the process of adding root domains to [Public Suffix List](https://en.wikipedia.org/wiki/Public_Suffix_List) so that browsers know that `a.ipfs.dapps.earth` has no relation to `b.ipfs.dapps.earth`, despite them being subdomains of the same domain.
 
 ## Is it that serious? Give me example!
 
 If you are still not convinced of security risks of traditional gateways, here is a demo.
 
 Consider the following two pages:
- - https://gateway.ipfs.io/ipns/ipfs.io/
- - https://swarm-gateways.net/bzz:/theswarm.eth/
+ - [https://gateway.ipfs.io/ipns/ipfs.io/](https://gateway.ipfs.io/ipns/ipfs.io/)
+ - [https://swarm-gateways.net/bzz:/theswarm.eth/](https://swarm-gateways.net/bzz:/theswarm.eth/)
 
 These two links are using official gateways and are pointing to home pages of IPFS and Swarm correspondingly.
 
