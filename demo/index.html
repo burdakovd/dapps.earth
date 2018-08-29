@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Oops</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-122332887-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-122332887-2');
+    </script>
+    <style type="text/css">
+      #warning {
+        background: url('https://ipfs.io/ipfs/QmQgKnwjW4JBSFpW6AKvP8p3FhCbyjWzjJ4tczqF9rwKk7') no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+      }
+
+      html {
+          height: 100%;
+      }
+
+      body {
+          height: 100%;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      .wrapper {
+          min-height: 100%;
+          height: auto !important;
+          height: 100%;
+          padding: 5em;
+      }
+
+      p {
+        margin: 1em 0;
+      }
+
+      .card {
+          box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+          background-color: #fff;
+          opacity: 0.95;
+          border-radius: 10px;
+          padding: 1em;
+          width: 80%;
+          margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="warning" style="display:none" class="wrapper">
+      <div class="card">
+        <h2>Looking for <b><span id="desired">TBD</span></b> - aren't you?</h2>
+        <p>
+          Sadly, it is not here. You can look in your URL bar and confirm that the URL is correct and it was supposed to be here. However it is not. If you had bookmarked this page before, now you'd see that this bookmark is active, hence you are at the right page.
+        </p>
+        <p>
+          Now, imagine if you were accessing some ÐApp that lets you perform an Ethereum transaction? Scary yet? Whoever gave you the link, could have replaced the contents of the page to anything without you noticing.
+        </p>
+        <p>
+          You can refresh the page if you want the magic to go away.
+        </p>
+        <p>
+          Or use this link to send it to a friend: <span id="original"></span>
+          <br/>
+          <div class="addthis_inline_share_toolbox"></div>
+        </p>
+        <p>
+          Or go to <a href="https://dapps.earth/">https://dapps.earth/</a> to see how to browse decentralized networks safer.
+        </p>
+      </div>
+      <script type="text/javascript">
+        'use strict';
+
+        var link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/png';
+        link.rel = 'shortcut icon';
+        link.href = 'https://dapps.earth/favicon.png';
+        document.getElementsByTagName('head')[0].appendChild(link);
+
+        var tns = window.location.hash.substr(1).split('#');
+        var target = tns[0];
+        var short = tns[1];
+        if (target !== '') {
+          history.replaceState({}, "meh", target);
+        }
+        var w = document.querySelector('#warning');
+        w.style.display = "block";
+
+        var desired = window.location.href;
+
+        var w2 = document.querySelector('#desired');
+        w2.innerHTML = desired;
+
+        var w3 = document.querySelector('#original');
+        var a = document.createElement('a');
+        var linkText = document.createTextNode(short);
+        a.appendChild(linkText);
+        a.title = short;
+        a.href = short;
+        w3.appendChild(a);
+
+        window.addthis_share = {
+          url: short,
+          title: "Importance of HTTP origin for IPFS/Swarm gateways",
+          description: "Demo showing how it is possible to forge IPFS/Swarm pages on HTTP gateways"
+        };
+      </script>
+      <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5b861014fb35da77"></script>
+    </div>
+  </body>
+</html>
