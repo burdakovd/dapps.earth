@@ -28,4 +28,4 @@ ipfs config --json Swarm.DisableNatPortMap false
 
 ipfs config show
 
-exec env IPFS_LOGGING=warning ipfs daemon --enable-gc
+exec env IPFS_LOGGING=info ipfs daemon --enable-gc
