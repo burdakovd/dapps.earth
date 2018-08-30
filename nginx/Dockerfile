@@ -5,25 +5,8 @@ FROM debian:stable
 RUN apt-get update && apt-get -y --no-install-recommends install openssl
 RUN openssl dhparam -out /dhparam.pem 2048
 
-FROM node:8.10
-
-RUN mkdir /root/html
-WORKDIR /root/html
-COPY html/package.json ./
-COPY html/yarn.lock ./
-RUN yarn install
-COPY html/src ./src
-COPY html/static ./static
-COPY html/webpack.config.js ./
-RUN rm -f ./src/README.md
-COPY README.md ./src/README.md
-RUN npx webpack --mode=production
-
-FROM nginx:stable
-
-RUN apt-get update && \
-  apt-get -y --no-install-recommends install \
-  wget ca-certificates git inotify-tools
+RUN apt-get update && apt-get -y --no-install-recommends install \
+  wget ca-certificates git
 
 RUN \
   wget -O /usr/local/bin/dumb-init \
@@ -40,6 +23,27 @@ RUN cd /tmp && \
   cd /tmp && \
   rm -r /tmp/wait-for
 
+
+FROM node:8.9.1-alpine
+
+RUN mkdir /root/html
+WORKDIR /root/html
+COPY html/package.json ./
+COPY html/yarn.lock ./
+RUN yarn install
+COPY html/src ./src
+COPY html/static ./static
+COPY html/webpack.config.js ./
+RUN rm -f ./src/README.md
+COPY README.md ./src/README.md
+RUN npx webpack --mode=production
+
+
+FROM nginx:stable
+
+RUN apt-get update && \
+  apt-get -y --no-install-recommends install inotify-tools
+
 VOLUME /etc/nginx/certs
 
 WORKDIR /root
@@ -48,6 +52,8 @@ COPY nginx/nginx-template.conf /etc/nginx/nginx-template.conf
 
 RUN rm -rf /var/www/ && mkdir /var/www
 COPY --from=0 /dhparam.pem /etc/nginx/dhparam.pem
+COPY --from=0 /usr/local/bin/dumb-init /usr/local/bin/dumb-init
+COPY --from=0 /bin/wait-for /bin/wait-for
 COPY --from=1 /root/html/dist /var/www/static
 COPY README.md /var/www/static/README.md
 

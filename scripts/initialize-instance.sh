@@ -122,6 +122,7 @@ echo "Working directory: \$WORKDIR"
 
   . $DEPLOY_ENV
   docker-compose up --build --remove-orphans -d
+  docker image prune -a -f
   # Sad story, but the output is less messed up in this case
   sleep 5
 )

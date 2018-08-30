@@ -1,10 +1,13 @@
-FROM node:8.9.1
+FROM node:8.9.1-alpine
 
-RUN apt-get install wget
-RUN \
-  wget \
-  https://github.com/Yelp/dumb-init/releases/download/v1.2.1/dumb-init_1.2.1_amd64.deb \
-  && dpkg -i dumb-init_*.deb
+RUN apk update && apk add wget ca-certificates && \
+  wget -O /usr/bin/dumb-init \
+  https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 \
+  && chmod +x /usr/bin/dumb-init
+
+FROM node:8.9.1-alpine
+
+COPY --from=0 /usr/bin/dumb-init /usr/bin/dumb-init
 
 WORKDIR /code
 
