@@ -1,7 +1,7 @@
 # <img src="https://dapps.earth/icon300.png" alt="drawing" width="32" valign="middle"/> dapps.earth: secure IPFS and Swarm gateway
 Server deployment details: [Integrity logs](https://dapps.earth/integrity/), [Travis credentials](https://dapps.earth/travis-credentials/)
 
-Source code: [https://github.com/burdakovd/dapps.earth](https://github.com/burdakovd/dapps.earth) [![Build Status](https://travis-ci.com/burdakovd/dapps.earth.svg?branch=master)](https://travis-ci.com/burdakovd/dapps.earth)
+Source code: [https://github.com/burdakovd/dapps.earth](https://github.com/burdakovd/dapps.earth) [![Build Status](https://api.travis-ci.com/burdakovd/dapps.earth.svg?branch=master)](https://travis-ci.com/burdakovd/dapps.earth)
 
 ## What?
 

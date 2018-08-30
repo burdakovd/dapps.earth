@@ -1,3 +1,24 @@
+FROM debian:stable
+
+# Put this first to recompute this layer less frequently
+# as it is pretty slow
+RUN apt-get update && apt-get -y --no-install-recommends install openssl
+RUN openssl dhparam -out /dhparam.pem 2048
+
+FROM node:8.10
+
+RUN mkdir /root/html
+WORKDIR /root/html
+COPY html/package.json ./
+COPY html/yarn.lock ./
+RUN yarn install
+COPY html/src ./src
+COPY html/static ./static
+COPY html/webpack.config.js ./
+RUN rm -f ./src/README.md
+COPY README.md ./src/README.md
+RUN npx webpack --mode=production
+
 FROM nginx:stable
 
 RUN apt-get update && \
@@ -26,7 +47,8 @@ COPY nginx/start.sh ./
 COPY nginx/nginx-template.conf /etc/nginx/nginx-template.conf
 
 RUN rm -rf /var/www/ && mkdir /var/www
-COPY html /var/www/static
+COPY --from=0 /dhparam.pem /etc/nginx/dhparam.pem
+COPY --from=1 /root/html/dist /var/www/static
 COPY README.md /var/www/static/README.md
 
 VOLUME /var/log/dapps.earth-integrity
