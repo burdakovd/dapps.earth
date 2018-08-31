@@ -96,6 +96,7 @@ instance_id=$(
     --image-id $AMI_AMAZON_LINUX2 \
     --security-group-ids "$SECURITY_GROUP" \
     --count 1 \
+    --iam-instance-profile Name="logger" \
     --instance-type t2.medium \
     --query 'Instances[0].InstanceId' \
     --user-data file://$USER_DATA \
