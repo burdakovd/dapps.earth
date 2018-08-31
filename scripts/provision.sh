@@ -91,6 +91,7 @@ instance_id=$(
   echo "Script size: $(bash -o pipefail -c "$SOURCE" | wc -c)" >&2
   echo "User data size: $(wc -c < $USER_DATA)" >&2
 
+  # TODO: --block-device-mapping DeviceName=/dev/sda1,Ebs={VolumeSize=100}
   aws ec2 run-instances \
     --image-id $AMI_AMAZON_LINUX2 \
     --security-group-ids "$SECURITY_GROUP" \

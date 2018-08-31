@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 user=$(whoami)
 repo="$IPFS_PATH"
@@ -17,14 +17,19 @@ else
   ipfs init
 fi
 
+EXTERNAL_IP=$(/usr/bin/dig +short myip.opendns.com @resolver1.opendns.com)
+
 ipfs config profile apply server
 ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/8080
+ipfs config --json Addresses.Swarm '["/ip4/0.0.0.0/tcp/4001"]'
+ipfs config --json Addresses.Announce "[\"/ip4/$EXTERNAL_IP/tcp/4001\"]"
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
 ipfs config Datastore.StorageMax 2GB
 ipfs config --json Discovery.MDNS.Enabled false
 ipfs config Gateway.RootRedirect https://dapps.earth/
-ipfs config --json Swarm.DisableNatPortMap false
+ipfs config --json Swarm.DisableNatPortMap true
+ipfs config --json Swarm.EnableRelayHop false
 
 ipfs config show
 
