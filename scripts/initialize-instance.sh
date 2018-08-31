@@ -20,6 +20,24 @@ swapon -a
 free
 
 # set up cloudwatch
+mkdir /root/cloudwatch-install && cd /root/cloudwatch-install
+yum update -y
+yum install -y perl-Switch perl-DateTime perl-Sys-Syslog \
+  perl-LWP-Protocol-https perl-Digest-SHA.x86_64
+curl -f https://aws-cloudwatch.s3.amazonaws.com/downloads/CloudWatchMonitoringScripts-1.2.2.zip -O
+unzip CloudWatchMonitoringScripts-1.2.2.zip && \
+  rm -f CloudWatchMonitoringScripts-1.2.2.zip && \
+  cd aws-scripts-mon
+ln -sf $(pwd)/mon-put-instance-data.pl /bin/mon-put-instance-data.pl
+cd /
+
+echo "*/5 * * * * root cd /root/cloudwatch-install/aws-scripts-mon && \
+  ./mon-put-instance-data.pl --mem-util --mem-used --mem-avail --swap-util \
+    --swap-used --disk-path=/ --disk-space-util --disk-space-used \
+    --disk-space-avail --from-cron" \
+  > /etc/cron.d/send-cloudwatch-stats
+
+# set up cloudwatch logs
 yum install -y awslogs
 
 declare -A aws_monitored_logs=(
@@ -62,6 +80,7 @@ chmod +x /usr/local/bin/docker-compose
 chkconfig docker on
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose --version
+mkdir /etc/docker
 echo "
 {
   \"log-driver\": \"awslogs\",
