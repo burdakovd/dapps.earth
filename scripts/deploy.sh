@@ -15,7 +15,6 @@ if [ ! -z "$DEBUG_KEY_NAME" ]; then
     export DOCKER_HOST=unix://$(pwd)/docker.sock
 
     docker-compose up -d --build --remove-orphans
-    docker-compose logs -t
   )
 else
   # When deployment is from travis, connect to destination, get credentials,

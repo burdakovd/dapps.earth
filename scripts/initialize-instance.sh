@@ -2,6 +2,15 @@
 
 date
 
+while ! curl -f http://169.254.169.254/latest/meta-data/instance-id; do
+  echo "Waiting for metadata service to initialize" >&2
+  sleep 5;
+done
+
+EC2_INSTANCE_ID=$(curl -f http://169.254.169.254/latest/meta-data/instance-id)
+EC2_AVAIL_ZONE=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+EC2_REGION=$(echo "$EC2_AVAIL_ZONE" | sed 's/[a-z]$//')
+
 # Basic set up
 dd if=/dev/zero of=/mnt/swap count=2048 bs=1MiB
 chmod 600 /mnt/swap
@@ -23,7 +32,6 @@ declare -A aws_monitored_logs=(
   [/var/log/dapps.earth-integrity/init.stdout.txt]=""
   [/var/log/dapps.earth-integrity/maintenance.txt]="%Y-%m-%dT%H:%M:%S%z"
   [/var/log/dapps.earth-integrity/provision.txt]=""
-  # TODO: logs from docker
 )
 
 for log in "${!aws_monitored_logs[@]}"; do \
@@ -51,10 +59,20 @@ usermod -a -G docker ec2-user
 curl -f -L https://github.com/docker/compose/releases/download/1.21.0/docker-compose-`uname -s`-`uname -m` \
   -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
-service docker start
 chkconfig docker on
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 docker-compose --version
+echo "
+{
+  \"log-driver\": \"awslogs\",
+  \"log-opts\": {
+    \"awslogs-region\": \"${EC2_REGION}\",
+    \"awslogs-group\": \"docker.${EC2_INSTANCE_ID}\",
+    \"awslogs-create-group\": \"true\"
+  }
+}
+" > /etc/docker/daemon.json
+service docker start
 
 # Travis
 
@@ -192,7 +210,7 @@ done
 echo "@reboot travis /home/travis/serve_credentials" > \
   /etc/cron.d/serve_travis_credentials
 
-(su travis -c /home/travis/serve_credentials &) &
+(su travis -c /home/travis/serve_credentials >/dev/null 2>&1 </dev/null &) &
 
 # Create maintainer user
 
