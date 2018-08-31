@@ -10,6 +10,40 @@ echo '/mnt/swap none swap defaults 0 0' >> /etc/fstab
 swapon -a
 free
 
+# set up cloudwatch
+yum install -y awslogs
+
+declare -A aws_monitored_logs=(
+  # (by default) [/var/log/messages]="%b %d %H:%M:%S"
+  [/var/log/secure]="%b %d %H:%M:%S"
+  [/var/log/audit/audit.log]=""
+  [/var/log/dapps.earth-integrity/deployments.txt]="%Y-%m-%dT%H:%M:%S%z"
+  [/var/log/dapps.earth-integrity/init.script.txt]=""
+  [/var/log/dapps.earth-integrity/init.stderr.txt]=""
+  [/var/log/dapps.earth-integrity/init.stdout.txt]=""
+  [/var/log/dapps.earth-integrity/maintenance.txt]="%Y-%m-%dT%H:%M:%S%z"
+  [/var/log/dapps.earth-integrity/provision.txt]=""
+  # TODO: logs from docker
+)
+
+for log in "${!aws_monitored_logs[@]}"; do \
+  echo "
+[$log]
+file = $log
+buffer_duration = 5000
+log_stream_name = {instance_id}
+initial_position = start_of_file
+log_group_name = $log
+" >> /etc/awslogs/awslogs.conf
+  if [ ! -z "${aws_monitored_logs[$log]}" ]; then
+    echo "datetime_format = ${aws_monitored_logs[$log]}" >> \
+      /etc/awslogs/awslogs.conf
+  fi
+done
+
+systemctl start awslogsd
+systemctl enable awslogsd.service
+
 # Docker
 yum update -y
 yum install -y docker htop
@@ -48,10 +82,10 @@ export HOME=/root
 # (which this account has none), so it is safe to hardcode it here.
 # This is a mess, and Github deactivates it if finds it as cleartext in
 # public repository, so here we do a little bit of encryption.
-travis login --pro --github-token $(
+travis login --pro --github-token "$(
   echo U2FsdGVkX18FzRWMB/gCSkqljed4wAOwBY0eo+pDi0kK5249quoqXTtBh5Ln0bGN7jvLjfSlk6foxuTf8iINCQ== | \
     openssl aes-256-cbc -pass pass:1234 -a -d
-)
+)"
 travis encrypt -r burdakovd/dapps.earth --pro \
   "TRAVIS_PASSWORD_$TRAVIS_PASSWORD_NAME=$TRAVIS_PASSWORD" > \
   $TRAVIS_KEY.password.enc
@@ -87,14 +121,13 @@ chown -R travis /home/travis/.ssh/
 cat << EOF > /home/travis/deploy
 #!/bin/bash -e
 
-echo "[\$(date)] Received command \$SSH_ORIGINAL_COMMAND from [\$SSH_CLIENT]" \\
+echo "[\$(date -Iseconds)] Received command \$SSH_ORIGINAL_COMMAND from [\$SSH_CLIENT]" \\
   | tee -a /var/log/dapps.earth-integrity/deployments.txt
 
 [[ "\$SSH_ORIGINAL_COMMAND" =~ ^[a-z0-9]+\$ ]]
 COMMIT="\$SSH_ORIGINAL_COMMAND"
 
-# TODO: send logs to cloudwatch
-echo "[\$(date)] Attempt to deploy \$COMMIT from [\$SSH_CLIENT]" \\
+echo "[\$(date -Iseconds)] Attempt to deploy \$COMMIT from [\$SSH_CLIENT]" \\
   | tee -a /var/log/dapps.earth-integrity/deployments.txt
 
 WORKDIR=\$(mktemp -d)
@@ -115,7 +148,7 @@ echo "Working directory: \$WORKDIR"
   LATEST_COMMIT=\$(git rev-parse HEAD)
   echo "latest commit in branch $DEPLOY_BRANCH: \$LATEST_COMMIT"
   if [ ! "\$COMMIT" = "\$LATEST_COMMIT" ]; then
-    echo "[\$(date)] Refused to deploy \$COMMIT from [\$SSH_CLIENT] because latest in $DEPLOY_BRANCH is \$LATEST_COMMIT" \
+    echo "[\$(date -Iseconds)] Refused to deploy \$COMMIT from [\$SSH_CLIENT] because latest in $DEPLOY_BRANCH is \$LATEST_COMMIT" \
       | tee -a /var/log/dapps.earth-integrity/deployments.txt
     false
   fi
@@ -127,7 +160,7 @@ echo "Working directory: \$WORKDIR"
   sleep 5
 )
 
-echo "[\$(date)] Deployed $DEPLOY_ENV from \$COMMIT from [\$SSH_CLIENT]" \\
+echo "[\$(date -Iseconds)] Deployed $DEPLOY_ENV from \$COMMIT from [\$SSH_CLIENT]" \\
   | tee -a /var/log/dapps.earth-integrity/deployments.txt
 EOF
 
@@ -180,10 +213,8 @@ if [ ! -z "$MAINTAINER_KEY" ]; then
   cat << 'EOF' > /home/maintainer/maintain
 #!/bin/sh
 
-echo "[$(date)] Received command $SSH_ORIGINAL_COMMAND" \
+echo "[$(date -Iseconds)] Received command $SSH_ORIGINAL_COMMAND" \
   | tee -a /var/log/dapps.earth-integrity/maintenance.txt
-
-# TODO: send command and connection details to cloudwatch
 
 case "$SSH_ORIGINAL_COMMAND" in
     "top -s")
@@ -195,8 +226,11 @@ case "$SSH_ORIGINAL_COMMAND" in
     "free")
         free
         ;;
+    "cat /var/log/awslogs.log")
+        cat /var/log/awslogs.log
+        ;;
     *)
-        echo "[$(date)] Denied command $SSH_ORIGINAL_COMMAND" \
+        echo "[$(date -Iseconds)] Denied command $SSH_ORIGINAL_COMMAND" \
           | tee -a /var/log/dapps.earth-integrity/maintenance.txt
         exit 1
         ;;
