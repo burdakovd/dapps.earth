@@ -30,7 +30,7 @@ RUN mkdir /root/html
 WORKDIR /root/html
 COPY html/package.json ./
 COPY html/yarn.lock ./
-RUN yarn install
+RUN yarn install --network-timeout 100000
 COPY html/src ./src
 COPY html/static ./static
 COPY html/webpack.config.js ./
