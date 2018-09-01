@@ -287,16 +287,19 @@ EOF
   chown maintainer /var/log/dapps.earth-integrity/maintenance.txt
 fi
 
-# finally, catch all process creation and log for audit
-mkdir -p /root/perf-tools
-cd /root/perf-tools
-git init
-git remote add origin https://github.com/brendangregg/perf-tools.git
-git fetch origin 98d42a2a1493d2d1c651a5c396e015d4f082eb20
-git reset --hard FETCH_HEAD
-echo "@reboot root /root/perf-tools/execsnoop -rt >> /var/log/execsnoop.log" \
-  > /etc/cron.d/execsnoop
-(/root/perf-tools/execsnoop -rt >> /var/log/execsnoop.log 2>/dev/null </dev/null &) &
+# execsnoop turned a bit unstable, so disabling it for now
+if false; then
+  # finally, catch all process creation and log for audit
+  mkdir -p /root/perf-tools
+  cd /root/perf-tools
+  git init
+  git remote add origin https://github.com/brendangregg/perf-tools.git
+  git fetch origin 98d42a2a1493d2d1c651a5c396e015d4f082eb20
+  git reset --hard FETCH_HEAD
+  echo "@reboot root /root/perf-tools/execsnoop -rt >> /var/log/execsnoop.log" \
+    > /etc/cron.d/execsnoop
+  (/root/perf-tools/execsnoop -rt >> /var/log/execsnoop.log 2>/dev/null </dev/null &) &
+fi
 
 # delete ece2-user if it is not needed
 if [ ! "$HAS_DEBUG_KEY" = "1" ]; then
