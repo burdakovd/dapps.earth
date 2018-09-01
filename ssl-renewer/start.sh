@@ -10,9 +10,10 @@ user=$(whoami)
 whoami
 
 if test "$user" = 'root'; then
+  ls -lh /etc/nginx
+  ls -lh /etc/nginx/certs || true
   chown -R renewer:users /etc/nginx/certs
-  chmod -R g-w /etc/nginx/certs
-  chmod -R o-rwx /etc/nginx/certs
+  chmod -R u=rwx,g=rx,o= /etc/nginx/certs
   chown -R renewer:users /successes
 
   mkdir -p /nanodns
@@ -22,12 +23,15 @@ if test "$user" = 'root'; then
 
   echo "dropping root privileges"
   cd /
-  exec su renewer "$SCRIPT"
+  exec su renewer -c "exec bash -e $SCRIPT"
 fi
 
 test "$user" = 'renewer'
 
 umask 027
+
+ls -lh /etc/nginx
+ls -lh /etc/nginx/certs
 
 rm -f /etc/nginx/certs/perm-test
 : > /etc/nginx/certs/perm-test
@@ -40,7 +44,7 @@ else
 fi
 rm -f /etc/nginx/certs/perm-test
 
-CACHE_VERSION=7
+CACHE_VERSION=8
 
 function record_success() {
   HOST="$1"
@@ -138,6 +142,7 @@ while true; do
         echo "Got certificate for $HOSTS..."
         HOST=$(echo $HOSTS | awk '{print $1}')
         SANITIZED_HOST=$(echo $HOST | sed 's/[*]/wildcard/')
+        ls -lh /etc/nginx
         mkdir -p /etc/nginx/certs/$SANITIZED_HOST
         ~/.acme.sh/acme.sh --install-cert -d $HOST \
           --cert-file /etc/nginx/certs/$SANITIZED_HOST/cert \
