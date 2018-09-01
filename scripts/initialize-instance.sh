@@ -19,8 +19,9 @@ echo '/mnt/swap none swap defaults 0 0' >> /etc/fstab
 swapon -a
 free
 
-# grab UID=100,1001 as they are used inside docker
+# grab UID=100,101,1001 as they are used inside docker
 adduser dummy100 -u 100
+adduser dummy101 -u 101
 adduser dummy1001 -u 1001
 
 # set up cloudwatch
