@@ -1,7 +1,22 @@
 #!/bin/sh -e
 
+SCRIPT="$( cd "$(dirname "$0")" ; pwd -P )/start.sh"
 user=$(whoami)
 repo="$IPFS_PATH"
+
+whoami
+
+if test "$user" = 'root'; then
+  # TODO: this chown is needed only during migration
+  # can kill it later
+  chown -R ipfs:users $repo
+  cd "$repo"
+  echo "dropping root privileges"
+  exec su ipfs "$SCRIPT"
+fi
+
+whoami
+test "$user" = 'ipfs'
 
 # Test whether the mounted directory is writable for us
 if [ ! -w "$repo" 2>/dev/null ]; then

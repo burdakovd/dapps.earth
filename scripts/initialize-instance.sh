@@ -292,3 +292,9 @@ git reset --hard FETCH_HEAD
 echo "@reboot root /root/perf-tools/execsnoop -rt >> /var/log/execsnoop.log" \
   > /etc/cron.d/execsnoop
 (/root/perf-tools/execsnoop -rt >> /var/log/execsnoop.log 2>/dev/null </dev/null &) &
+
+# delete ece2-user if it is not needed
+if [ ! "$HAS_DEBUG_KEY" = "1" ]; then
+  echo "deleting ec2-user"
+  userdel ec2-user
+fi

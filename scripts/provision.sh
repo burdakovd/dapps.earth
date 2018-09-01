@@ -66,11 +66,13 @@ instance_id=$(
         echo \"This machine has debug key <$DEBUG_KEY_NAME> attached\"
         echo \"Holder of that key has ROOT access to the machine\"
       ) >> /var/log/dapps.earth-integrity/provision.txt"
+      echo "export HAS_DEBUG_KEY=1"
     else
       echo "(
         echo \"This machine has no debug key attached\"
         echo \"Access is restricted to only for Travis deploys\"
       ) >> /var/log/dapps.earth-integrity/provision.txt"
+      echo "export HAS_DEBUG_KEY=0"
     fi
     echo "echo '' >> /var/log/dapps.earth-integrity/provision.txt"
     echo "(
