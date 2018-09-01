@@ -19,6 +19,9 @@ echo '/mnt/swap none swap defaults 0 0' >> /etc/fstab
 swapon -a
 free
 
+# grab UID=100 as it is used inside docker
+adduser dummy100 -u 100
+
 # set up cloudwatch
 mkdir /root/cloudwatch-install && cd /root/cloudwatch-install
 yum update -y
