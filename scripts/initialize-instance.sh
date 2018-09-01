@@ -80,6 +80,7 @@ curl -f -L https://github.com/docker/compose/releases/download/1.22.0/docker-com
 chmod +x /usr/local/bin/docker-compose
 chkconfig docker on
 ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+docker --version
 docker-compose --version
 mkdir /etc/docker
 echo "
