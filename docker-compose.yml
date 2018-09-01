@@ -38,7 +38,7 @@ services:
     environment:
       - BASE_DOMAIN
       - NS_DOMAIN
-      - HOSTS=$BASE_DOMAIN alt.$BASE_DOMAIN *.$BASE_DOMAIN *.ipfs.$BASE_DOMAIN *.swarm.$BASE_DOMAIN *.eth.swarm.$BASE_DOMAIN
+      - HOSTS=$BASE_DOMAIN *.$BASE_DOMAIN *.ipfs.$BASE_DOMAIN *.swarm.$BASE_DOMAIN *.eth.swarm.$BASE_DOMAIN
       - MAX_SSL_CERTIFICATE_AGE_DAYS=14
     volumes:
       - ssl-renewer-successes:/successes
