@@ -22,6 +22,6 @@ EXPOSE 8080
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-# TODO: change user
+USER node:node
 
 CMD ["/usr/local/bin/node", "app.js"]
