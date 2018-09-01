@@ -15,7 +15,6 @@ if test "$user" = 'root'; then
   exec su ipfs "$SCRIPT"
 fi
 
-whoami
 test "$user" = 'ipfs'
 
 # Test whether the mounted directory is writable for us

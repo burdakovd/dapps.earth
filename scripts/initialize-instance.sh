@@ -300,3 +300,5 @@ if [ ! "$HAS_DEBUG_KEY" = "1" ]; then
   # just to grab uid=1000
   adduser dummy -u 1000
 fi
+
+adduser dummy1001 -u 1001
