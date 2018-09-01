@@ -24,7 +24,7 @@ RUN cd /tmp && \
   rm -r /tmp/wait-for
 
 
-FROM node:8.9.1-alpine
+FROM node:10-alpine
 
 RUN mkdir /root/html
 WORKDIR /root/html
