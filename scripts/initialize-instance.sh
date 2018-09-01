@@ -19,8 +19,9 @@ echo '/mnt/swap none swap defaults 0 0' >> /etc/fstab
 swapon -a
 free
 
-# grab UID=100 as it is used inside docker
+# grab UID=100,1001 as they are used inside docker
 adduser dummy100 -u 100
+adduser dummy1001 -u 1001
 
 # set up cloudwatch
 mkdir /root/cloudwatch-install && cd /root/cloudwatch-install
@@ -303,5 +304,3 @@ if [ ! "$HAS_DEBUG_KEY" = "1" ]; then
   # just to grab uid=1000
   adduser dummy -u 1000
 fi
-
-adduser dummy1001 -u 1001
