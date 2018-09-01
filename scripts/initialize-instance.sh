@@ -44,6 +44,7 @@ declare -A aws_monitored_logs=(
   # (by default) [/var/log/messages]="%b %d %H:%M:%S"
   [/var/log/secure]="%b %d %H:%M:%S"
   [/var/log/audit/audit.log]=""
+  [/var/log/execsnoop.log]=""
   [/var/log/dapps.earth-integrity/deployments.txt]="%Y-%m-%dT%H:%M:%S%z"
   [/var/log/dapps.earth-integrity/init.script.txt]=""
   [/var/log/dapps.earth-integrity/init.stderr.txt]=""
@@ -279,3 +280,14 @@ EOF
   touch /var/log/dapps.earth-integrity/maintenance.txt
   chown maintainer /var/log/dapps.earth-integrity/maintenance.txt
 fi
+
+# finally, catch all process creation and log for audit
+mkdir -p /root/perf-tools
+cd /root/perf-tools
+git init
+git remote add origin https://github.com/brendangregg/perf-tools.git
+git fetch origin 98d42a2a1493d2d1c651a5c396e015d4f082eb20
+git reset --hard FETCH_HEAD
+echo "@reboot root /root/perf-tools/execsnoop -rt >> /var/log/execsnoop.log" \
+  > /etc/cron.d/execsnoop
+(/root/perf-tools/execsnoop -rt >> /var/log/execsnoop.log 2>/dev/null </dev/null &) &
