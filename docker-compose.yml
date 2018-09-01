@@ -8,6 +8,7 @@ services:
   proxy:
     restart: always
     build: proxy
+    container_name: proxy
     environment:
       - BASE_DOMAIN
       - HAS_SSL=1
@@ -18,6 +19,7 @@ services:
     build:
       context: .
       dockerfile: nginx/Dockerfile
+    container_name: frontend
     environment:
       - BASE_DOMAIN
     volumes:
@@ -32,6 +34,7 @@ services:
   ssl-renewer:
     restart: always
     build: ssl-renewer
+    container_name: ssl-renewer
     environment:
       - BASE_DOMAIN
       - NS_DOMAIN
@@ -45,6 +48,7 @@ services:
   ipfs:
     restart: always
     build: ipfs
+    container_name: ipfs
     ports:
       - "4001:4001"
     volumes:

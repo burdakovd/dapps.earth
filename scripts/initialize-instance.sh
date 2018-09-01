@@ -87,7 +87,8 @@ echo "
   \"log-opts\": {
     \"awslogs-region\": \"${EC2_REGION}\",
     \"awslogs-group\": \"docker.${EC2_INSTANCE_ID}\",
-    \"awslogs-create-group\": \"true\"
+    \"awslogs-create-group\": \"true\",
+    \"tag\": \"{{.Name}}-{{.ID}}\"
   }
 }
 " > /etc/docker/daemon.json
