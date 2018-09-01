@@ -42,6 +42,7 @@ ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", 
 ipfs config Datastore.StorageMax 2GB
 ipfs config --json Discovery.MDNS.Enabled false
 ipfs config Gateway.RootRedirect https://dapps.earth/
+ipfs config Routing.Type dhtclient
 ipfs config --json Swarm.DisableNatPortMap true
 ipfs config --json Swarm.EnableRelayHop false
 ipfs config --json Swarm.AddrFilters '[
@@ -66,4 +67,4 @@ ipfs config --json Swarm.AddrFilters '[
 
 ipfs config show
 
-exec env IPFS_LOGGING=debug ipfs daemon --enable-gc
+exec env IPFS_LOGGING=info ipfs daemon --enable-gc
