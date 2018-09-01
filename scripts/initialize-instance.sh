@@ -297,4 +297,6 @@ echo "@reboot root /root/perf-tools/execsnoop -rt >> /var/log/execsnoop.log" \
 if [ ! "$HAS_DEBUG_KEY" = "1" ]; then
   echo "deleting ec2-user"
   userdel ec2-user
+  # just to grab uid=1000
+  adduser dummy -u 1000
 fi
