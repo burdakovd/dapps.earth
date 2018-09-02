@@ -53,8 +53,18 @@ services:
       - "4001:4001"
     volumes:
       - ipfs-data:/data/ipfs
+  geth:
+    restart: always
+    build: geth
+    container_name: geth
+    ports:
+      - "30303:30303"
+      - "30303:30303/udp"
+    volumes:
+      - geth-data:/home/gethuser/.ethereum
 
 volumes:
   ssl-renewer-successes:
   certs:
   ipfs-data:
+  geth-data:
