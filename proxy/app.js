@@ -50,7 +50,6 @@ var handlers = {
   ['^(.+)\\.ipfs\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
     const cid = new CID(match[1]);
     const backendCID = cid.codec === 'dag-pb' ? cid.toV0() : cid;
-    // TODO: switch to local node if there is noticeable traffic
     proxy.web(
       req,
       res,
@@ -64,11 +63,10 @@ var handlers = {
   // if someone is accessing swarm subdomain, proxy to swarm
   ['^(.+)\\.swarm\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
     var name = match[1]
-    // TODO: switch to local node if there is noticeable traffic
     proxy.web(
       req,
       res,
-      { target: 'https://swarm-gateways.net/bzz:/' + name, changeOrigin: true }
+      { target: 'http://swarm:8500/bzz:/' + name, changeOrigin: true }
     )
   },
 };

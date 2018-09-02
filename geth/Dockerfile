@@ -11,13 +11,13 @@ RUN adduser -D -h /home/gethuser -u 1001 -G users gethuser
 RUN mkdir /home/gethuser/.ethereum
 RUN chown gethuser:users /home/gethuser/.ethereum
 
-COPY bootnodes.txt /etc/bootnodes.txt
-RUN chown root:root /etc/bootnodes.txt
+COPY --chown=root:root bootnodes.txt /etc/bootnodes.txt
 
 VOLUME /home/gethuser/.ethereum
 
-USER gethuser
 COPY --from=tools /usr/local/bin/dig /usr/bin/dig
+
+USER gethuser
 ENTRYPOINT []
 CMD [ \
   "bash", \
@@ -30,7 +30,7 @@ CMD [ \
     --rpc \
     --rpcaddr 0.0.0.0 \
     --rpcport 8545 \
-    --rpcapi 'eth,net,web3' \
+    --rpcapi 'eth,net,web3,personal' \
     --verbosity 4 \
     --rpcvhosts=geth \
   " \

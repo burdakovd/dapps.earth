@@ -14,6 +14,7 @@ services:
       - HAS_SSL=1
     depends_on:
       - ipfs
+      - swarm
   frontend:
     restart: always
     build:
@@ -32,6 +33,7 @@ services:
       - proxy
       - ssl-renewer
       - geth
+      - swarm
   ssl-renewer:
     restart: always
     build: ssl-renewer
@@ -63,9 +65,19 @@ services:
       - "30303:30303/udp"
     volumes:
       - geth-data:/home/gethuser/.ethereum
+  swarm:
+    restart: always
+    build: swarm
+    container_name: swarm
+    depends_on:
+      - geth
+    volumes:
+      - swarm-data:/home/swarmuser/data
+    # TODO: ports?
 
 volumes:
   ssl-renewer-successes:
   certs:
   ipfs-data:
   geth-data:
+  swarm-data:
