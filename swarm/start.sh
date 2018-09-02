@@ -10,15 +10,18 @@ while ! "${JSONRPC[@]}" '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[]
   sleep 5
 done
 
-ACCOUNT=$(\
+ACCOUNT_FILE=$DATADIR/account
+
+if [ ! -f $ACCOUNT_FILE ]; then
   geth --datadir $DATADIR \
-  console --exec 'personal.newAccount("1234")' \
-    | jq -r \
-)
+    console --exec 'personal.newAccount("1234")' \
+      | jq -r > $ACCOUNT_FILE.staging
+  mv $ACCOUNT_FILE.staging $ACCOUNT_FILE
+fi
 
 # store size is in chunks of size 5KB
 exec swarm \
-  --bzzaccount $ACCOUNT \
+  --bzzaccount $(cat $ACCOUNT_FILE) \
   --ens-api http://geth:8545 \
   --bootnodes \
     $(cat /etc/bootnodes.txt | grep -v '#' | grep '.' | paste -sd,) \
@@ -27,7 +30,8 @@ exec swarm \
   --datadir $DATADIR \
   --httpaddr 0.0.0.0 \
   --bzzport 8500 \
-  --store.size 400000 \
+  --store.size 40000 \
   --store.cache.size 40000 \
-  --verbosity 3 \
+  --verbosity 4 \
+  --maxpeers 25 \
   --password /etc/1234 \

@@ -1,5 +1,5 @@
-FROM alpine:latest as tools
-RUN apk update && apk add curl tar ca-certificates
+FROM ubuntu as tools
+RUN apt-get update && apt-get -y install curl tar ca-certificates
 RUN curl -f -L \
   https://github.com/sequenceiq/docker-alpine-dig/releases/download/v9.10.2/dig.tgz \
   | tar -xzv -C /usr/local/bin/
@@ -8,7 +8,8 @@ RUN curl --fail --silent --show-error \
   https://gist.githubusercontent.com/homotopycolimit/db446fa3269a199762e67b2ca037dbeb/raw/8c522a4e64cf02ae0b02f4115bc84d12a5fa85ad/gistfile1.txt \
   > /etc/bootnodes.raw.txt
 
-RUN awk -F '"' '{print $2}' < /etc/bootnodes.raw.txt > /etc/bootnodes.txt \
+# Pick some addresses from the middle
+RUN cat /etc/bootnodes.raw.txt | sort -R | head -n2 | awk -F '"' '{print $2}' > /etc/bootnodes.txt \
   && tail -v -n +1 /etc/bootnodes.txt
 
 FROM ethereum/client-go:alltools-stable

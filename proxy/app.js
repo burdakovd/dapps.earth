@@ -62,11 +62,12 @@ var handlers = {
   },
   // if someone is accessing swarm subdomain, proxy to swarm
   ['^(.+)\\.swarm\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
-    var name = match[1]
+    var name = match[1];
+    var target = 'http://swarm:8500/bzz:/' + name;
     proxy.web(
       req,
       res,
-      { target: 'http://swarm:8500/bzz:/' + name, changeOrigin: true }
+      { target, changeOrigin: true }
     )
   },
 };

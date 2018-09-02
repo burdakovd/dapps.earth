@@ -73,7 +73,9 @@ services:
       - geth
     volumes:
       - swarm-data:/home/swarmuser/data
-    # TODO: ports?
+    ports:
+      - "30399:30399"
+      - "30399:30399/udp"
 
 volumes:
   ssl-renewer-successes:
