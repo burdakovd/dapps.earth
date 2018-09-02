@@ -100,7 +100,7 @@ instance_id=$(
     --block-device-mapping=file://<( \
       aws ec2 describe-images \
         --image $AMI_AMAZON_LINUX2 --output=json \
-        | jq '.Images[0].BlockDeviceMappings | map(.Ebs.VolumeSize=$DISK_SIZE) | map(del(.Ebs.Encrypted))' \
+        | jq ".Images[0].BlockDeviceMappings | map(.Ebs.VolumeSize=$DISK_SIZE) | map(del(.Ebs.Encrypted))" \
       ) \
     --iam-instance-profile Name="logger" \
     --instance-type t2.medium \
