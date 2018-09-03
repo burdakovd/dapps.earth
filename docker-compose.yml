@@ -3,6 +3,7 @@ version: '3'
 # Need to provide the following environment variables when running:
 # - BASE_DOMAIN (accessible to target audience, not necessarily public internet)
 # - NS_DOMAIN (accessible to public internet)
+# - IS_LARGE (whether we are starting a large node)
 
 services:
   proxy:
@@ -65,6 +66,8 @@ services:
       - "30303:30303/udp"
     volumes:
       - geth-data:/home/gethuser/.ethereum
+    environment:
+      - IS_LARGE
   swarm:
     restart: always
     build: swarm
@@ -76,6 +79,8 @@ services:
     ports:
       - "30399:30399"
       - "30399:30399/udp"
+    environment:
+      - IS_LARGE
 
 volumes:
   ssl-renewer-successes:

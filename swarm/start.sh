@@ -31,7 +31,8 @@ exec swarm \
   --httpaddr 0.0.0.0 \
   --bzzport 8500 \
   --store.size 40000 \
-  --store.cache.size 8000000 \
+  --store.cache.size \
+    $(if [ ! -z $IS_LARGE ]; then echo 8000000; else echo 400000; fi) \
   --verbosity 4 \
   --maxpeers 25 \
   --password /etc/1234 \

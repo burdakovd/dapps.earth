@@ -39,7 +39,11 @@ ipfs config --json Addresses.Swarm '["/ip4/0.0.0.0/tcp/4001"]'
 ipfs config --json Addresses.Announce "[\"/ip4/$EXTERNAL_IP/tcp/4001\"]"
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
-ipfs config Datastore.StorageMax 20GB
+if [ ! -z $IS_LARGE ]; then
+  ipfs config Datastore.StorageMax 20GB
+else
+  ipfs config Datastore.StorageMax 1GB
+fi
 ipfs config --json Discovery.MDNS.Enabled false
 ipfs config Gateway.RootRedirect https://dapps.earth/
 ipfs config Routing.Type dhtclient
