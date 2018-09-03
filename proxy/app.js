@@ -11,6 +11,7 @@ proxy.on('error', function(e) {
 
 const BASE_DOMAIN = process.env.BASE_DOMAIN;
 const HAS_SSL = process.env.HAS_SSL;
+const RUN_LOCAL_SWARM = process.env.RUN_LOCAL_SWARM;
 
 const regexify = function(s) {
   return s.replace('.', '\\.').replace('-', '\\-');
@@ -63,7 +64,10 @@ var handlers = {
   // if someone is accessing swarm subdomain, proxy to swarm
   ['^(.+)\\.swarm\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
     var name = match[1];
-    var target = 'http://swarm:8500/bzz:/' + name;
+    var base = RUN_LOCAL_SWARM === '1'
+      ? 'http://swarm:8500'
+      : 'https://swarm-gateways.net';
+    var target = base + '/bzz:/' + name;
     proxy.web(
       req,
       res,

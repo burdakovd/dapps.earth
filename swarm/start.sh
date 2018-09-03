@@ -2,6 +2,11 @@
 
 set -o pipefail
 
+if [ -z "$RUN_LOCAL_SWARM" ]; then
+  echo "Swarm is disabled, just sleeping"
+  exec sleep 86400
+fi
+
 JSONRPC=(curl --silent --fail --show-error -H "Content-Type: application/json" -X POST geth:8545 --data)
 DATADIR=/home/swarmuser/data
 

@@ -4,6 +4,7 @@ version: '3'
 # - BASE_DOMAIN (accessible to target audience, not necessarily public internet)
 # - NS_DOMAIN (accessible to public internet)
 # - IS_LARGE (whether we are starting a large node)
+# - RUN_LOCAL_SWARM (whether we are running own Swarm node vs using public gw)
 
 services:
   proxy:
@@ -13,6 +14,7 @@ services:
     environment:
       - BASE_DOMAIN
       - HAS_SSL=1
+      - RUN_LOCAL_SWARM
     depends_on:
       - ipfs
       - swarm
@@ -57,6 +59,9 @@ services:
       - "4001:4001"
     volumes:
       - ipfs-data:/data/ipfs
+    environment:
+      - IS_LARGE
+      - RUN_LOCAL_SWARM
   geth:
     restart: always
     build: geth
@@ -66,8 +71,6 @@ services:
       - "30303:30303/udp"
     volumes:
       - geth-data:/home/gethuser/.ethereum
-    environment:
-      - IS_LARGE
   swarm:
     restart: always
     build: swarm
@@ -81,6 +84,7 @@ services:
       - "30399:30399/udp"
     environment:
       - IS_LARGE
+      - RUN_LOCAL_SWARM
 
 volumes:
   ssl-renewer-successes:
