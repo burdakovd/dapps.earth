@@ -48,13 +48,13 @@ CACHE_VERSION=8
 
 function record_success() {
   HOST="$1"
-  encoded=$(echo "$CACHE_VERSION.$HOST" | base64)
+  encoded=$(echo "$CACHE_VERSION.$HOST" | sha256sum | awk '{print $1}')
   date >> "/successes/$encoded"
 }
 
 function is_fresh() {
   HOST="$1"
-  encoded=$(echo "$CACHE_VERSION.$HOST" | base64)
+  encoded=$(echo "$CACHE_VERSION.$HOST" | sha256sum | awk '{print $1}')
   file="/successes/$encoded"
   if [ ! -f "$file" ]; then
     echo "We haven't ever received a certificate for $HOST"

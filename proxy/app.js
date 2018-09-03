@@ -62,7 +62,7 @@ var handlers = {
     )
   },
   // if someone is accessing swarm subdomain, proxy to swarm
-  ['^(.+)\\.swarm\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
+  ['^(.+)\\.bzz\\.' + regexify(BASE_DOMAIN) + '$']: function(req, res, match) {
     var name = match[1];
     var base = RUN_LOCAL_SWARM === '1'
       ? 'http://swarm:8500'
