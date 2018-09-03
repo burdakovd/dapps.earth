@@ -30,9 +30,8 @@ exec swarm \
   --datadir $DATADIR \
   --httpaddr 0.0.0.0 \
   --bzzport 8500 \
-  --store.size 40000 \
-  --store.cache.size \
+  --store.cache.size 40000 \
+  --store.size \
     $(if [ ! -z $IS_LARGE ]; then echo 8000000; else echo 400000; fi) \
-  --verbosity 4 \
-  --maxpeers 25 \
+  --verbosity 3 \
   --password /etc/1234 \
