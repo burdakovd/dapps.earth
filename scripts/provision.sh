@@ -92,7 +92,7 @@ instance_id=$(
   echo "Script size: $(bash -o pipefail -c "$SOURCE" | wc -c)" >&2
   echo "User data size: $(wc -c < $USER_DATA)" >&2
 
-  aws ec2 run-instances \
+  instance_id=$(aws ec2 run-instances \
     --image-id $AMI_AMAZON_LINUX \
     --security-group-ids "$SECURITY_GROUP" \
     --count 1 \
@@ -106,7 +106,13 @@ instance_id=$(
     else \
       true; \
     fi) \
-    --output text
+    --output text \
+  )
+
+  mkdir instances/$instance_id
+  cp $USER_DATA instances/$instance_id/provision-user-data.sh
+
+  echo $instance_id
 )
 
 echo "Launched instance $instance_id"
