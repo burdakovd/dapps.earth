@@ -12,11 +12,6 @@ EC2_AVAIL_ZONE=$(curl -s http://169.254.169.254/latest/meta-data/placement/avail
 EC2_REGION=$(echo "$EC2_AVAIL_ZONE" | sed 's/[a-z]$//')
 
 # Basic set up
-dd if=/dev/zero of=/mnt/swap count=4096 bs=1MiB
-chmod 600 /mnt/swap
-mkswap /mnt/swap
-echo '/mnt/swap none swap defaults 0 0' >> /etc/fstab
-swapon -a
 free
 
 # grab UID=100,101,1001 as they are used inside docker
@@ -73,8 +68,8 @@ log_group_name = $log
   fi
 done
 
-systemctl start awslogsd
-systemctl enable awslogsd.service
+chkconfig awslogs on
+service awslogs start
 
 # Docker
 yum update -y
@@ -99,12 +94,16 @@ echo "
   }
 }
 " > /etc/docker/daemon.json
+mv /var/lib/docker /media/ephemeral0/
+ln -sv /media/ephemeral0/docker /var/lib/docker
 service docker start
 
 # Travis
 
 yum install -y ruby ruby-devel libffi-devel gcc
 gem install travis -v 1.8.9 --no-rdoc --no-ri
+
+export PATH=$PATH:/usr/local/bin
 
 # Generate keys for Travis
 # password name is just to avoid collisions in Travis environment variables

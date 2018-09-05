@@ -9,8 +9,7 @@ export DEPLOY_BRANCH=$(. $DEPLOY_ENV && echo $BRANCH)
 
 [ ! -z "$DEPLOY_BRANCH" ]
 
-AMI_AMAZON_LINUX2=ami-04681a1dbd79675a5
-DISK_SIZE=100
+AMI_AMAZON_LINUX=ami-0130c3a072f3832ff
 USER_DATA="$(mktemp)"
 
 instance_id=$(
@@ -94,16 +93,11 @@ instance_id=$(
   echo "User data size: $(wc -c < $USER_DATA)" >&2
 
   aws ec2 run-instances \
-    --image-id $AMI_AMAZON_LINUX2 \
+    --image-id $AMI_AMAZON_LINUX \
     --security-group-ids "$SECURITY_GROUP" \
     --count 1 \
-    --block-device-mapping=file://<( \
-      aws ec2 describe-images \
-        --image $AMI_AMAZON_LINUX2 --output=json \
-        | jq ".Images[0].BlockDeviceMappings | map(.Ebs.VolumeSize=$DISK_SIZE) | map(del(.Ebs.Encrypted))" \
-      ) \
     --iam-instance-profile Name="logger" \
-    --instance-type t2.medium \
+    --instance-type m1.small \
     --query 'Instances[0].InstanceId' \
     --user-data file://$USER_DATA \
     $(if [ ! -z "$DEBUG_KEY_NAME" ]; then \

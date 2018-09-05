@@ -22,16 +22,21 @@ ENTRYPOINT []
 CMD [ \
   "bash", \
   "-exc", \
-  "exec geth --nousb --syncmode light \
-    --nat \
-      extip:$(/usr/bin/dig +short myip.opendns.com @resolver1.opendns.com) \
-    --bootnodes \
-      $(cat /etc/bootnodes.txt | grep -v '#' | grep '.' | paste -sd,) \
-    --rpc \
-    --rpcaddr 0.0.0.0 \
-    --rpcport 8545 \
-    --rpcapi 'eth,net,web3,personal' \
-    --verbosity 4 \
-    --rpcvhosts=geth \
+  "if [ -z \"$RUN_LOCAL_SWARM\" ]; then \
+    echo 'Swarm is disabled, sleeping instead of running geth'; \
+    exec sleep 86400; \
+  else \
+    exec geth --nousb --syncmode light \
+      --nat \
+        extip:$(/usr/bin/dig +short myip.opendns.com @resolver1.opendns.com) \
+      --bootnodes \
+        $(cat /etc/bootnodes.txt | grep -v '#' | grep '.' | paste -sd,) \
+      --rpc \
+      --rpcaddr 0.0.0.0 \
+      --rpcport 8545 \
+      --rpcapi 'eth,net,web3,personal' \
+      --verbosity 4 \
+      --rpcvhosts=geth; \
+  fi \
   " \
 ]

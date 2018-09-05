@@ -71,6 +71,8 @@ services:
       - "30303:30303/udp"
     volumes:
       - geth-data:/home/gethuser/.ethereum
+    environment:
+      - RUN_LOCAL_SWARM
   swarm:
     restart: always
     build: swarm
