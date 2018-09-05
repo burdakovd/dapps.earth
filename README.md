@@ -2,7 +2,7 @@
 
 Source code: [https://github.com/burdakovd/dapps.earth](https://github.com/burdakovd/dapps.earth) [![Build Status](https://api.travis-ci.com/burdakovd/dapps.earth.svg?branch=master)](https://travis-ci.com/burdakovd/dapps.earth)
 
-Deployment transparency: [Integrity logs](https://dapps.earth/integrity/), [CI credentials](https://dapps.earth/travis-credentials/)
+Deployment transparency: [server logs](https://dapps.earth/integrity/), [CI credentials](https://dapps.earth/travis-credentials/)
 
 ## What?
 
