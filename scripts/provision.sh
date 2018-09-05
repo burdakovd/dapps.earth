@@ -2,6 +2,8 @@
 
 # Launch a new instance on AWS, attach existing or new elastic IP to it
 
+set -o pipefail
+
 [ ! -z "$SECURITY_GROUP" ]
 [ ! -z "$DEPLOY_ENV" ]
 
@@ -116,6 +118,17 @@ instance_id=$(
 )
 
 echo "Launched instance $instance_id"
+
+(
+  echo '{'
+  ./scripts/aws_query.py $instance_id \
+    "$(aws configure get aws_access_key_id --profile provisioner)" \
+    "$(aws configure get aws_secret_access_key --profile provisioner)" | \
+    sed "s/'/\"/g"
+  echo '"description": "links to query the state of this instance"'
+  echo '}'
+) | jq . > instances/$instance_id/urls.json
+
 echo "Waiting for $instance_id to start..."
 
 aws ec2 wait instance-running --instance-ids $instance_id

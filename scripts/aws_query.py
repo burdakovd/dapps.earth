@@ -1,22 +1,23 @@
+#!/usr/bin/env python3
+
 import sys
 import hmac
 import base64
 import hashlib
 from urllib import parse
 
-if len(sys.argv) != 5:
-    print ('Output HTTPS GET links to be used to check the oracle status')
+if len(sys.argv) != 4:
+    print ('Output HTTPS GET links to be used to check the status of provisioned instance')
     print ('The default availability zone is ec2.us-east-1.amazonaws.com')
-    print ('Usage: instance-id volume-id AWS-ID AWS-secret')
-    print ('Where instance-id is the oracle instance and volume-id is the volume attached to it')
+    print ('Usage: instance-id AWS-ID AWS-secret')
+    print ('Where instance-id is the provisioned instance')
     exit(0)
 
 common_args = [('Expires=2025-01-01'), ('SignatureMethod=HmacSHA256'), ('SignatureVersion=2')]
 availability_zone = 'ec2.us-east-1.amazonaws.com'
 instance_id = sys.argv[1]
-volume_id = sys.argv[2]
-key = sys.argv[3]
-secret = sys.argv[4]
+key = sys.argv[2]
+secret = sys.argv[3]
 
 def makeurl(args, endpoint, abbr):
     args.sort()
@@ -39,29 +40,6 @@ args.append('InstanceId='+instance_id)
 args.append('AWSAccessKeyId='+key)
 args.append('Version=2014-10-01')
 makeurl(args, availability_zone, 'DI')
-
-args = []
-args.extend(common_args)
-args.append('Action=DescribeVolumes')
-args.append('VolumeId='+volume_id)
-args.append('AWSAccessKeyId='+key)
-args.append('Version=2014-10-01')
-makeurl(args, availability_zone, 'DV')
-
-args = []
-args.extend(common_args)
-args.append('Action=GetConsoleOutput')
-args.append('InstanceId='+instance_id)
-args.append('AWSAccessKeyId='+key)
-args.append('Version=2014-10-01')
-makeurl(args, availability_zone, 'GCO')
-
-args = []
-args.extend(common_args)
-args.append('Action=GetUser')
-args.append('AWSAccessKeyId='+key)
-args.append('Version=2010-05-08')
-makeurl(args, 'iam.amazonaws.com', 'GU')
 
 args = []
 args.extend(common_args)
