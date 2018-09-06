@@ -1,13 +1,40 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import 'typebase.css';
+import 'formbase/dist/formbase.min.css';
+import './button.css';
 
 const GithubLink = () => {
   const url = 'https://github.com/burdakovd/dapps.earth';
   return <a href={url}>{url}</a>;
 };
 
-const Page = ({host}) => (
+class ChangeDomainForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: props.domain,
+    };
+    this.handleChange = e => this.setState({ value: e.target.value });
+    this.onChoose = () => this.props.onChoose(this.state.value);
+  }
+
+  render() {
+    return (
+      <form>
+        <label>
+          Choose domain to audit (or keep it as is for <b>{this.props.domain}</b>):{' '}
+          <input class="input" type="text" value={this.state.value} size={30} onChange={
+            this.handleChange
+          } />
+        </label>
+        <input class="button" type="submit" value="Submit" onClick={this.onChoose} />
+      </form>
+    );
+  }
+};
+
+const Page = ({ host, onUpdate }) => (
   <div>
     <h2>Audit <a href="/">{host}</a></h2>
     <p>
@@ -45,16 +72,55 @@ const Page = ({host}) => (
       <a href="https://github.com/burdakovd/dapps.earth/blob/master/audit.html">from the repository</a>
       {' '}and open it locally, or <a href="https://github.com/burdakovd/dapps.earth/tree/master/audit">build from source</a>.
     </p>
+    <h3>Choose domain to audit</h3>
+    <p>
+      <ChangeDomainForm domain={host} onChoose={onUpdate} />
+    </p>
+    <h3>Steps</h3>
     <p>
       Actual procedure TBD.
     </p>
   </div>
 );
 
+class Root extends React.Component {
+  constructor(props) {
+    super(props);
+
+    const extractDomain = () => {
+      const anchor = window.location.hash;
+      const host = window.location.hostname;
+      return anchor ? anchor.substring(1) : host;
+    };
+
+    this.state = {
+      domain: extractDomain(),
+    };
+
+    this.onUpdate = domain => window.location.hash = domain;
+
+    this.onHashUpdate = () => {
+      this.setState({domain: extractDomain()});
+    };
+  }
+
+  componentDidMount() {
+    window.addEventListener("hashchange", this.onHashUpdate, false);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("hashchange", this.onHashUpdate, false);
+  }
+
+  render() {
+    const domain = this.state.domain;
+    return <Page host={domain} onUpdate={this.onUpdate} key={domain} />;
+  }
+};
+
 function main() {
   const root = document.getElementById('root');
-  const host = window.location.hostname;
-  ReactDOM.render(<Page host={host} />, root);
+  ReactDOM.render(<Root />, root);
 }
 
 main();
