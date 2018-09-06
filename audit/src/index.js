@@ -39,11 +39,12 @@ class ChangeDomainForm extends React.Component {
 
 const Page = ({ host, onUpdate }) => (
   <div>
-    <h2>Audit <a href="/">{host}</a></h2>
+    <h2>Audit <a href={"https://" + host + "/"}>{host}</a></h2>
     <p>
-      This page is designed to guide you through the process of proving
-      that the server behind <b>{host}</b> is running open source code from{' '}
-      <GithubLink />, and couldn't have been tampered with by AWS account owner.
+      This page is designed to guide you through the process of verifying
+      whether the server behind <b>{host}</b> is running open source code from{' '}
+      <GithubLink />, and whether it could have been tampered with by
+      AWS account owner.
     </p>
     <p>
       The instance provisioning procedure was designed in such a way that you
