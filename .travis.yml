@@ -13,6 +13,9 @@ before_install:
 script:
   - docker-compose pull
   - docker-compose build
+  - docker run -e JUST_PRINT_AUDIT_PAGE=1 dappsearth_frontend > audit.html.expected
+  - diff audit.html audit.html.expected
+  - rm -f audit.html.expected
 
 after_success:
   - ./scripts/travis-deploy.sh .env.staging
