@@ -1,5 +1,6 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
+import 'typebase.css';
 
 const GithubLink = () => {
   const url = 'https://github.com/burdakovd/dapps.earth';
@@ -8,10 +9,10 @@ const GithubLink = () => {
 
 const Page = ({host}) => (
   <div>
-    <h1>Audit <a href="/">{host}</a></h1>
+    <h2>Audit <a href="/">{host}</a></h2>
     <p>
       This page is designed to guide you through the process of proving
-      that the server behind {host} is running open source code from{' '}
+      that the server behind <b>{host}</b> is running open source code from{' '}
       <GithubLink />, and couldn't have been tampered with by AWS account owner.
     </p>
     <p>
@@ -25,7 +26,8 @@ const Page = ({host}) => (
     <p>
       Once the instance is provisioned, it will receive code updates from{' '}
       <GithubLink /> (branch=release). Community should review commits to the
-      repository to ensure the code does not contain backdoors.
+      repository to ensure the code does not contain backdoors. Such reviews are
+      outside of scope of this page.
     </p>
     <p>
       You should not blindly trust verification status from this page, as
@@ -35,7 +37,7 @@ const Page = ({host}) => (
     </p>
     <p>
       One may prefer to view this page on Github rather than from potentially
-      untrusted server, this can be done on:{' '}
+      untrusted server, this can be done on{' '}
       <a href="https://rawgit.com/burdakovd/dapps.earth/master/audit.html">rawgit</a>
       {' '}(rawgit is an independent website allowing people to view web pages
         from Github repository).
