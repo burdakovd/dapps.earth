@@ -35,9 +35,13 @@ const Page = ({host}) => (
     </p>
     <p>
       One may prefer to view this page on Github rather than from potentially
-      untrusted server, this can be done here: LINK TBD.
-      You can also download page from here LINK TBD, or build from source
-      LINK TBD.
+      untrusted server, this can be done on:{' '}
+      <a href="https://rawgit.com/burdakovd/dapps.earth/master/audit.html">rawgit</a>
+      {' '}(rawgit is an independent website allowing people to view web pages
+        from Github repository).
+      You can also download page{' '}
+      <a href="https://github.com/burdakovd/dapps.earth/blob/master/audit.html">from the repository</a>
+      {' '}and open it locally, or <a href="https://github.com/burdakovd/dapps.earth/tree/master/audit">build from source</a>.
     </p>
     <p>
       Actual procedure TBD.
