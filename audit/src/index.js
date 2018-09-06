@@ -16,7 +16,10 @@ class ChangeDomainForm extends React.Component {
       value: props.domain,
     };
     this.handleChange = e => this.setState({ value: e.target.value });
-    this.onChoose = () => this.props.onChoose(this.state.value);
+    this.onChoose = (e) => {
+      e.preventDefault();
+      this.props.onChoose(this.state.value);
+    };
   }
 
   render() {
@@ -65,7 +68,7 @@ const Page = ({ host, onUpdate }) => (
     <p>
       One may prefer to view this page on Github rather than from potentially
       untrusted server, this can be done on{' '}
-      <a href="https://rawgit.com/burdakovd/dapps.earth/master/audit.html">rawgit</a>
+      <a href={"https://rawgit.com/burdakovd/dapps.earth/master/audit.html#" + host}>rawgit</a>
       {' '}(rawgit is an independent website allowing people to view web pages
         from Github repository).
       You can also download page{' '}
