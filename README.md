@@ -2,7 +2,7 @@
 
 Source code: [https://github.com/burdakovd/dapps.earth](https://github.com/burdakovd/dapps.earth) [![Build Status](https://api.travis-ci.com/burdakovd/dapps.earth.svg?branch=master)](https://travis-ci.com/burdakovd/dapps.earth)
 
-Deployment transparency: [server logs](https://dapps.earth/integrity/), [CI credentials](https://dapps.earth/travis-credentials/)
+Deployment transparency: [audit server integrity](https://dapps.earth/audit.html), [view server logs](https://dapps.earth/integrity/), [CI credentials](https://dapps.earth/travis-credentials/)
 
 ## What?
 
@@ -18,7 +18,7 @@ There are existing gateways to IPFS and Swarm, notably [gateway.ipfs.io](https:/
 
 Furthermore, due to the same reasons, even http gateway on localhost (as a lot of people use) is not secure, unless you take special precautions.
 
-Web security has evolved over many years, and is a result of work of various standartization commitees, web browser developers, and website developers.
+Web security has evolved over many years, and is a result of work of various standardization committees, web browser developers, and website developers.
 
 One important concept in Web security model is **origin**. It roughly corresponds to a domain name. Browser mostly assume that objects from the same origin _trust_ each other, while different origins _do not trust_ each other. I.e. microsoft.com is not supposed to access or modify your data at google.com, whereas google.com/maps is allowed to access data from google.com
 

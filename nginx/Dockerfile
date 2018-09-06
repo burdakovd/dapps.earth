@@ -1,4 +1,4 @@
-FROM debian:stable
+FROM debian:stable as tools
 
 # Put this first to recompute this layer less frequently
 # as it is pretty slow
@@ -24,7 +24,7 @@ RUN cd /tmp && \
   rm -r /tmp/wait-for
 
 
-FROM node:10-alpine
+FROM node:10-alpine as frontpage
 
 RUN mkdir /root/html
 WORKDIR /root/html
@@ -36,6 +36,19 @@ COPY html/static ./static
 COPY html/webpack.config.js ./
 RUN rm -f ./src/README.md
 COPY README.md ./src/README.md
+RUN npx webpack --mode=production
+
+
+FROM node:10-alpine as auditpage
+
+RUN mkdir /root/html
+WORKDIR /root/html
+COPY audit/package.json ./
+COPY audit/yarn.lock ./
+RUN yarn install --network-timeout 100000
+COPY audit/src ./src
+COPY audit/.babelrc ./
+COPY audit/webpack.config.js ./
 RUN npx webpack --mode=production
 
 
@@ -51,11 +64,11 @@ COPY nginx/start.sh ./
 COPY nginx/nginx-template.conf /etc/nginx/nginx-template.conf
 
 RUN rm -rf /var/www/ && mkdir /var/www
-COPY --from=0 /dhparam.pem /etc/nginx/dhparam.pem
-COPY --from=0 /usr/local/bin/dumb-init /usr/local/bin/dumb-init
-COPY --from=0 /bin/wait-for /bin/wait-for
-COPY --from=1 /root/html/dist /var/www/static
-COPY README.md /var/www/static/README.md
+COPY --from=tools /dhparam.pem /etc/nginx/dhparam.pem
+COPY --from=tools /usr/local/bin/dumb-init /usr/local/bin/dumb-init
+COPY --from=tools /bin/wait-for /bin/wait-for
+COPY --from=frontpage /root/html/dist /var/www/static
+COPY --from=auditpage /root/html/dist/index.html /var/www/static/audit.html
 
 VOLUME /var/log/dapps.earth-integrity
 
