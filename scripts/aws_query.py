@@ -33,19 +33,44 @@ def makeurl(args, endpoint, abbr):
     print ("'" + abbr + "':'" + final_string + "',")
 
 
-args = []
-args.extend(common_args)
-args.append('Action=DescribeInstances')
-args.append('InstanceId='+instance_id)
-args.append('AWSAccessKeyId='+key)
-args.append('Version=2014-10-01')
-makeurl(args, availability_zone, 'DI')
+def make_for_instance():
+    args = []
+    args.extend(common_args)
+    args.append('Action=DescribeInstances')
+    args.append('InstanceId='+instance_id)
+    args.append('AWSAccessKeyId='+key)
+    args.append('Version=2014-10-01')
+    makeurl(args, availability_zone, 'DI')
 
-args = []
-args.extend(common_args)
-args.append('Action=DescribeInstanceAttribute')
-args.append('InstanceId='+instance_id)
-args.append('Attribute=userData')
-args.append('AWSAccessKeyId='+key)
-args.append('Version=2014-10-01')
-makeurl(args, availability_zone, 'DIA')
+    args = []
+    args.extend(common_args)
+    args.append('Action=DescribeInstanceAttribute')
+    args.append('InstanceId='+instance_id)
+    args.append('Attribute=userData')
+    args.append('AWSAccessKeyId='+key)
+    args.append('Version=2014-10-01')
+    makeurl(args, availability_zone, 'DIA')
+
+
+def make_for_root():
+    args = []
+    args.extend(common_args)
+    args.append('Action=GetUser')
+    args.append('AWSAccessKeyId='+key)
+    args.append('Version=2010-05-08')
+    makeurl(args, 'iam.amazonaws.com', 'GU')
+
+    args = []
+    args.extend(common_args)
+    args.append('Action=ListMetrics')
+    args.append('Namespace=AWS/EBS')
+    args.append('MetricName=VolumeReadBytes')
+    args.append('AWSAccessKeyId='+key)
+    args.append('Version=2010-08-01')
+    makeurl(args, 'monitoring.us-east-1.amazonaws.com', 'LM')
+
+
+if instance_id != '':
+    make_for_instance()
+else:
+    make_for_root()
