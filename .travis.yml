@@ -18,5 +18,6 @@ script:
   - rm -f audit.html.expected
 
 after_success:
+  - ./scripts/travis-deploy.sh .env.staging
   - ./scripts/travis-deploy.sh .env.staging-2
   - ./scripts/travis-deploy.sh .env
