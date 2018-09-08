@@ -25,48 +25,50 @@ else
   echo "Will deploy code to the following addresses of $BASE_DOMAIN: $(echo $IPS)"
 
   for IP in $IPS; do
-    echo "Deploying to $IP"
-    CREDENTIALS="$(curl --silent --fail --show-error $IP:8080)"
-    KEY="$(echo "$CREDENTIALS" | jq -r '.key')"
-    SECURE_PASSWORD="$(echo "$CREDENTIALS" | jq -r '.secure_password')"
-    PASSPHRASE_VAR_NAME="TRAVIS_PASSWORD_$(echo "$CREDENTIALS" | jq -r '.secure_password_name')"
-
-    echo "Using passphrase from var $PASSPHRASE_VAR_NAME";
-    PASSPHRASE="${!PASSPHRASE_VAR_NAME}";
-    if [ -z "$PASSPHRASE" ]; then
-      echo "$PASSPHRASE_VAR_NAME is unset!";
-      echo "If the server was reprovisioned, add the following to secure variables section:"
-      echo "    # $PASSPHRASE_VAR_NAME (to deploy $ENV)"
-      echo "    - secure: \"$SECURE_PASSWORD\""
-      false
-    fi
-
-    echo "Passphrase length is ${#PASSPHRASE}";
-    KEY_FILE=$(mktemp)
     (
-      trap "rm -f $KEY_FILE" EXIT
+      echo "Deploying to $IP"
+      CREDENTIALS="$(curl --silent --fail --show-error $IP:8080)"
+      KEY="$(echo "$CREDENTIALS" | jq -r '.key')"
+      SECURE_PASSWORD="$(echo "$CREDENTIALS" | jq -r '.secure_password')"
+      PASSPHRASE_VAR_NAME="TRAVIS_PASSWORD_$(echo "$CREDENTIALS" | jq -r '.secure_password_name')"
 
-      base64 -d < <(echo "$KEY") > $KEY_FILE
-      if ! ssh-keygen -o -p -P "$PASSPHRASE" -N "" -f "$KEY_FILE"; then
-        echo "Failed to unlock key";
+      echo "Using passphrase from var $PASSPHRASE_VAR_NAME";
+      PASSPHRASE="${!PASSPHRASE_VAR_NAME}";
+      if [ -z "$PASSPHRASE" ]; then
+        echo "$PASSPHRASE_VAR_NAME is unset!";
+        echo "If the server was reprovisioned, add the following to secure variables section:"
+        echo "    # $PASSPHRASE_VAR_NAME (to deploy $ENV)"
+        echo "    - secure: \"$SECURE_PASSWORD\""
         false
-      fi;
-
-      echo "Attempting to use the key to deploy on $BASE_DOMAIN ($IP)..."
-      # Ideally server fingerprint would be delivered in archive
-      # together with client certificate, but I was too lazy.
-      # There isn't an attack surface here anyway, as we are just pushing
-      # the code.
-      if \
-        ssh -oStrictHostKeyChecking=no \
-          -i "$KEY_FILE" \
-          "travis@$IP" \
-          "$(git rev-parse HEAD)"; \
-      then
-        echo "Succeeded deploying."
-      else
-        echo "Failed deploying."
       fi
-    )
+
+      echo "Passphrase length is ${#PASSPHRASE}";
+      KEY_FILE=$(mktemp)
+      (
+        trap "rm -f $KEY_FILE" EXIT
+
+        base64 -d < <(echo "$KEY") > $KEY_FILE
+        if ! ssh-keygen -o -p -P "$PASSPHRASE" -N "" -f "$KEY_FILE"; then
+          echo "Failed to unlock key";
+          false
+        fi;
+
+        echo "Attempting to use the key to deploy on $BASE_DOMAIN ($IP)..."
+        # Ideally server fingerprint would be delivered in archive
+        # together with client certificate, but I was too lazy.
+        # There isn't an attack surface here anyway, as we are just pushing
+        # the code.
+        if \
+          ssh -oStrictHostKeyChecking=no \
+            -i "$KEY_FILE" \
+            "travis@$IP" \
+            "$(git rev-parse HEAD)"; \
+        then
+          echo "Succeeded deploying."
+        else
+          echo "Failed deploying."
+        fi
+      )
+    ) || true
   done
 fi
