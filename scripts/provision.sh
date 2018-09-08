@@ -117,7 +117,16 @@ instance_id=$(
   echo $instance_id
 )
 
+[ ! -z "$instance_id" ]
+
 echo "Launched instance $instance_id"
+
+if [ -z "$ELASTIC_IP" ]; then
+  export ELASTIC_IP=$(aws ec2 allocate-address --output=json | jq -r ".PublicIp")
+  echo "Allocated elastic IP $ELASTIC_IP" >&2
+fi
+
+[ ! -z "$ELASTIC_IP" ]
 
 (
   echo '{'
