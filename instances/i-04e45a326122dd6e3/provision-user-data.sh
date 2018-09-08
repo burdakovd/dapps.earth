@@ -1,0 +1,36 @@
+#!/bin/bash -xe
+export INIT_SCRIPT_SOURCE="echo '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' | base64 -d | gunzip"
+bash -o pipefail -c "$INIT_SCRIPT_SOURCE" > /root/dapps.earth-init.sh
+chmod +x /root/dapps.earth-init.sh
+mkdir -p /var/log/dapps.earth-integrity
+date
+echo ''
+export MAINTAINER_KEY='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCDBPllnfZm4CcIu4XHjoMHNHAtUgijPn8RSY6dzL3FM1Ry6TmLJapf68jXiiDWu3aRdc6w+PGLBKIdGd7fVs+q1wnXptEwrxfnMUWFomOutgpblbopqHXjnoekazBbsXiN1Clvq54eco/HFWTjQwIubgjXtWKWle+CjU8pJhgB5Oo3/lj6OQlD/bPDsVR+wlSCXFw1Fh2loOrImvUbWdpJr95Ccr4Kx/5Z1mzf++GYy+zuVT77Oj6hOL6Sh6zYXH0kt5VFNM1Irt0HlCvL1LO5R4eU6qNGbxfIpt8gy513fX/t5/uE6LmUbHrJ3v4Mz0/lj42g3PQc2z5vxyUdaROF'
+(
+        echo "This machine has monitoring key <$MAINTAINER_KEY> attached"
+        echo "Holder of that key has unprivileged access to the machine"
+        echo "The key allows basic read-only commands, "
+        echo "such as df -h, free, top -s, etc."
+        echo ''
+      ) >> /var/log/dapps.earth-integrity/provision.txt
+export DEPLOY_BRANCH='master'
+export DEPLOY_ENV='.env.staging-2'
+(
+      echo "This machine will accept deployments from Travis for:"
+      echo "  - branch: master"
+      echo "  - env: .env.staging-2"
+      echo ''
+    ) >> /var/log/dapps.earth-integrity/provision.txt
+(
+        echo "This machine has debug key <tst> attached"
+        echo "Holder of that key has ROOT access to the machine"
+      ) >> /var/log/dapps.earth-integrity/provision.txt
+export HAS_DEBUG_KEY=1
+echo '' >> /var/log/dapps.earth-integrity/provision.txt
+(
+      echo "Source of init script:"
+      echo "  $INIT_SCRIPT_SOURCE"
+    ) >> /var/log/dapps.earth-integrity/provision.txt
+cp /root/dapps.earth-init.sh /var/log/dapps.earth-integrity/init.script.txt
+time /root/dapps.earth-init.sh >       >(tee /var/log/dapps.earth-integrity/init.stdout.txt)       2> >(tee /var/log/dapps.earth-integrity/init.stderr.txt >&2)     
+echo "Exit code of init script: $?"       >> /var/log/dapps.earth-integrity/provision.txt     
