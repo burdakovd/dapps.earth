@@ -225,11 +225,11 @@ echo "
 }
 " > /home/travis/credentials
 
-yum install -y nc
+yum install -y nmap-ncat
 echo '
 #!/bin/bash
 while true; do
-  (echo -e "HTTP/1.1 200 OK\n" && cat /home/travis/credentials) | nc -l 0.0.0.0 8080 >/dev/null
+  (echo -e "HTTP/1.1 200 OK\n" && cat /home/travis/credentials) | ncat -l 0.0.0.0 8080 >/dev/null
 done
 ' > /home/travis/serve_credentials && chmod +x /home/travis/serve_credentials
 
