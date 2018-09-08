@@ -21,6 +21,7 @@ else
   # and decrypt them using secure variables mechanism
   [ ! -z "$TRAVIS" ]
   [ ! -z "$ENV" ]
+  echo "My IP: $(dig +short myip.opendns.com @resolver1.opendns.com)"
   IPS="$(dig +short a.staging-2.dapps.earth a)"
   echo "Will deploy code to the following addresses of $BASE_DOMAIN: $(echo $IPS)"
 
