@@ -6,18 +6,19 @@ import base64
 import hashlib
 from urllib import parse
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     print ('Output HTTPS GET links to be used to check the status of provisioned instance')
     print ('The default availability zone is ec2.us-east-1.amazonaws.com')
-    print ('Usage: instance-id AWS-ID AWS-secret')
+    print ('Usage: instance-id address AWS-ID AWS-secret')
     print ('Where instance-id is the provisioned instance')
     exit(0)
 
 common_args = [('Expires=2025-01-01'), ('SignatureMethod=HmacSHA256'), ('SignatureVersion=2')]
 availability_zone = 'ec2.us-east-1.amazonaws.com'
 instance_id = sys.argv[1]
-key = sys.argv[2]
-secret = sys.argv[3]
+address = sys.argv[2]
+key = sys.argv[3]
+secret = sys.argv[4]
 
 def makeurl(args, endpoint, abbr):
     args.sort()
@@ -50,6 +51,14 @@ def make_for_instance():
     args.append('AWSAccessKeyId='+key)
     args.append('Version=2014-10-01')
     makeurl(args, availability_zone, 'DIA')
+
+    args = []
+    args.extend(common_args)
+    args.append('Action=DescribeAddresses')
+    args.append('PublicIp='+address)
+    args.append('AWSAccessKeyId='+key)
+    args.append('Version=2014-10-01')
+    makeurl(args, availability_zone, 'DA')
 
 
 def make_for_root():

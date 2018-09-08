@@ -128,15 +128,19 @@ fi
 
 [ ! -z "$ELASTIC_IP" ]
 
+mkdir -p addresses/$ELASTIC_IP
+
 (
   echo '{'
-  ./scripts/aws_query.py $instance_id \
+  ./scripts/aws_query.py $instance_id $ELASTIC_IP \
     "$(aws configure get aws_access_key_id --profile provisioner)" \
     "$(aws configure get aws_secret_access_key --profile provisioner)" | \
     sed "s/'/\"/g"
   echo '"description": "links to query the state of this instance"'
   echo '}'
-) | jq . > instances/$instance_id/urls.json
+) | jq . | tee >(cat >&2) | \
+  tee >(jq 'del(.DA)' > instances/$instance_id/urls.json) | \
+  jq '{DA}' > addresses/$ELASTIC_IP/urls.json
 
 echo "Waiting for $instance_id to start..."
 
