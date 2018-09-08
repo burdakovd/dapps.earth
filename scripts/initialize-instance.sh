@@ -19,6 +19,15 @@ adduser dummy100 -u 100
 adduser dummy101 -u 101
 adduser dummy1001 -u 1001
 
+# EC2 DNS seems to be quite unreliable, so set up fallback
+if [ -e "/etc/dhcp/dhclient-eth0.conf" ]; then
+    dhclient_conf_file="/etc/dhcp/dhclient-eth0.conf"
+else
+    dhclient_conf_file="/etc/dhcp/dhclient.conf"
+fi
+echo -e '\nappend domain-name-servers 8.8.8.8;' >> $dhclient_conf_file
+dhclient -r && dhclient
+
 # set up cloudwatch
 mkdir /root/cloudwatch-install && cd /root/cloudwatch-install
 yum update -y
