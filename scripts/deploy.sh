@@ -26,7 +26,9 @@ else
   echo "Will deploy code to the following addresses of $BASE_DOMAIN: $(echo $IPS)"
 
   for IP in $IPS; do
+    set +e
     (
+      set -e
       echo "Deploying to $IP"
       CREDENTIALS="$(curl --silent --fail --show-error $IP:8080)"
       KEY="$(echo "$CREDENTIALS" | jq -r '.key')"
@@ -70,6 +72,7 @@ else
           echo "Failed deploying."
         fi
       )
-    ) || true
+    )
+    set -e
   done
 fi
