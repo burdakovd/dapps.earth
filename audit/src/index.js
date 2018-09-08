@@ -9,16 +9,18 @@ const GithubLink = () => {
   return <a href={url}>{url}</a>;
 };
 
-class ChangeDomainForm extends React.Component {
+class ChangeParamsForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: props.domain,
+      domain: props.domain,
+      instance: props.instance,
     };
-    this.handleChange = e => this.setState({ value: e.target.value });
+    this.handleChangeDomain = e => this.setState({ domain: e.target.value });
+    this.handleChangeInstance = e => this.setState({ instance: e.target.value });
     this.onChoose = (e) => {
       e.preventDefault();
-      this.props.onChoose(this.state.value);
+      this.props.onChoose(this.state);
     };
   }
 
@@ -27,8 +29,14 @@ class ChangeDomainForm extends React.Component {
       <form>
         <label>
           Choose domain to audit (or keep it as is for <b>{this.props.domain}</b>):{' '}
-          <input class="input" type="text" value={this.state.value} size={30} onChange={
-            this.handleChange
+          <input class="input" type="text" value={this.state.domain} onChange={
+            this.handleChangeDomain
+          } />
+        </label>
+        <label>
+          Choose AWS instance to audit (leave empty to infer from domain):{' '}
+          <input class="input" type="text" value={this.state.instance} onChange={
+            this.handleChangeInstance
           } />
         </label>
         <input class="button" type="submit" value="Submit" onClick={this.onChoose} />
@@ -37,7 +45,7 @@ class ChangeDomainForm extends React.Component {
   }
 };
 
-const Page = ({ host, onUpdate }) => (
+const Page = ({ host, instance, onUpdate }) => (
   <div>
     <h2>Audit <a href={"https://" + host + "/"}>{host}</a></h2>
     <p>
@@ -69,7 +77,7 @@ const Page = ({ host, onUpdate }) => (
     <p>
       One may prefer to view this page on Github rather than from potentially
       untrusted server, this can be done on{' '}
-      <a href={"https://rawgit.com/burdakovd/dapps.earth/master/audit.html#" + host}>rawgit</a>
+      <a href={`https://rawgit.com/burdakovd/dapps.earth/master/audit.html#${host}/${instance}`}>rawgit</a>
       {' '}(rawgit is an independent website allowing people to view web pages
         from Github repository).
       You can also download page{' '}
@@ -78,7 +86,7 @@ const Page = ({ host, onUpdate }) => (
     </p>
     <h3>Choose domain to audit</h3>
     <p>
-      <ChangeDomainForm domain={host} onChoose={onUpdate} />
+      <ChangeParamsForm domain={host} instance={instance} onChoose={onUpdate} />
     </p>
     <h3>Steps</h3>
     <p>
@@ -91,20 +99,30 @@ class Root extends React.Component {
   constructor(props) {
     super(props);
 
-    const extractDomain = () => {
+    const extractParams = () => {
       const anchor = window.location.hash;
       const host = window.location.hostname;
-      return anchor ? anchor.substring(1) : host;
+      if (anchor) {
+        const [domain, instance] = anchor.substring(1).split('/');
+        return { domain, instance };
+      } else {
+        return {
+          domain: host,
+          instance: '',
+        }
+      }
     };
 
     this.state = {
-      domain: extractDomain(),
+      ...extractParams(),
     };
 
-    this.onUpdate = domain => window.location.hash = domain;
+    this.onUpdate = ({domain, instance}) => {
+      window.location.hash = `${domain}/${instance}`;
+    };
 
     this.onHashUpdate = () => {
-      this.setState({domain: extractDomain()});
+      this.setState({...extractParams()});
     };
   }
 
@@ -118,7 +136,8 @@ class Root extends React.Component {
 
   render() {
     const domain = this.state.domain;
-    return <Page host={domain} onUpdate={this.onUpdate} key={domain} />;
+    const instance = this.state.instance;
+    return <Page host={domain} instance={instance} onUpdate={this.onUpdate} key={domain} />;
   }
 };
 

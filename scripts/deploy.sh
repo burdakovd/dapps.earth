@@ -22,7 +22,7 @@ else
   [ ! -z "$TRAVIS" ]
   [ ! -z "$ENV" ]
   IPS="$(dig +short a.staging-2.dapps.earth a)"
-  echo "Will deploy code to the following addresses of $BASE_DOMAIN: $IPS"
+  echo "Will deploy code to the following addresses of $BASE_DOMAIN: $(echo $IPS)"
 
   for IP in $IPS; do
     echo "Deploying to $IP"
