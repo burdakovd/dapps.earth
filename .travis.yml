@@ -10,7 +10,7 @@ env:
     - secure: "bNF+HjCB1Xz8vF4K1v8RTA26KD3rDvGg7NaCR1z0O+w1PRyjOgedQbWyAM1+t+IRZ9rVqIsQ6CavSae88x5rPKHE1IKjrgBrOi1mpYYm+9XumLPRaVxwE9RaaQGtjkPwk3mo/UW+4RppkXpUyr0kcSSf5W21keTe8ryEb5gghL6pfvHaL6WB1/tfBap/Ih0PvWF3kbI/zi8xYNiGBm3EkzPpCYawvjnJwlLBBx0ZZPSd3LJSe3lT0vx3uML78e1svCUDdClue6iF25kMfufNxpWaomKfevMNBW2MBN9poBt9eNXVRp3FadAEep4emgEs/BGRa849Fh4ZG3vO7K8op3EZ4/s3ej57iFsw5q8FdVaE0o60Go2hwHqxybaU5zTgmSaDkEn8kbptzATszCWcLXms+57uY7n6KPKvaG9tAc0hbHRm7brWlLSB5qkCkvSdoQbzriZwT3GbhhLa7VpexQp/uQf+bHu/2vU10SPFHcX/6VLUVb4XFbNC/CiwV72kdFp6BtHCSMCeiQ9sKyEHd0iROy1MzTKUT++KcY3PShSkXl2IeF0Y3i2FqhJw+A67g2o2ga4uYn8L7c1XJlSnFkziPHL4lWsYC79zkWA2HZIF09h60RF7PPoAagglNQNQCDyfE57s9zd+Qt/pl+a5NoQb71bTQYPDgCuOsZf3O6M="
 
 before_install:
-  - sudo apt-get install jq
+  - sudo apt-get install jq dnsutils
 
 script:
   - docker-compose pull
