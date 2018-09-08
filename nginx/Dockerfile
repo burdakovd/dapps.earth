@@ -26,6 +26,7 @@ RUN cd /tmp && \
 
 FROM node:10-alpine as frontpage
 
+ARG WEBPACK_MODE=production
 RUN mkdir /root/html
 WORKDIR /root/html
 COPY html/package.json ./
@@ -36,11 +37,12 @@ COPY html/static ./static
 COPY html/webpack.config.js ./
 RUN rm -f ./src/README.md
 COPY README.md ./src/README.md
-RUN npx webpack --mode=production
+RUN npx webpack --mode=$WEBPACK_MODE
 
 
 FROM node:10-alpine as auditpage
 
+ARG WEBPACK_MODE=production
 RUN mkdir /root/html
 WORKDIR /root/html
 COPY audit/package.json ./
@@ -49,7 +51,7 @@ RUN yarn install --network-timeout 100000
 COPY audit/src ./src
 COPY audit/.babelrc ./
 COPY audit/webpack.config.js ./
-RUN npx webpack --mode=production
+RUN npx webpack --mode=$WEBPACK_MODE
 
 
 FROM nginx:stable

@@ -4,9 +4,13 @@ import 'typebase.css';
 import 'formbase/dist/formbase.min.css';
 import './button.css';
 
+const Link = ({url}) => {
+  return <a href={url}>{url}</a>;
+};
+
 const GithubLink = () => {
   const url = 'https://github.com/burdakovd/dapps.earth';
-  return <a href={url}>{url}</a>;
+  return <Link url={url} />;
 };
 
 class ChangeParamsForm extends React.Component {
@@ -29,17 +33,17 @@ class ChangeParamsForm extends React.Component {
       <form>
         <label>
           Choose domain to audit (or keep it as is for <b>{this.props.domain}</b>):{' '}
-          <input class="input" type="text" value={this.state.domain} onChange={
+          <input className="input" type="text" value={this.state.domain} onChange={
             this.handleChangeDomain
           } />
         </label>
         <label>
           Choose AWS instance to audit (leave empty to infer from domain):{' '}
-          <input class="input" type="text" value={this.state.instance} onChange={
+          <input className="input" type="text" value={this.state.instance} onChange={
             this.handleChangeInstance
           } />
         </label>
-        <input class="button" type="submit" value="Submit" onClick={this.onChoose} />
+        <input className="button" type="submit" value="Submit" onClick={this.onChoose} />
       </form>
     );
   }
@@ -84,16 +88,131 @@ const Page = ({ host, instance, onUpdate }) => (
       <a href="https://github.com/burdakovd/dapps.earth/blob/master/audit.html">from the repository</a>
       {' '}and open it locally, or <a href="https://github.com/burdakovd/dapps.earth/tree/master/audit">build from source</a>.
     </p>
-    <h3>Choose domain to audit</h3>
-    <p>
-      <ChangeParamsForm domain={host} instance={instance} onChoose={onUpdate} />
-    </p>
+    <h3>Parameters</h3>
+    <ChangeParamsForm domain={host} instance={instance} onChoose={onUpdate} />
     <h3>Steps</h3>
-    <p>
-      Actual procedure TBD.
-    </p>
+    <AuditRoot domain={host} forceInstance={instance} />
   </div>
 );
+
+/*
+type AuditorState = {
+  isOK: boolean,
+  isFinished: boolean,
+  logs: Array[React.Element],
+};
+type AuditorProps = {
+  domain: string,
+  forceInstance: string,
+}
+*/
+
+const PassedBadge = () => <b style={{color: '#29aa46'}}>[PASSED]</b>;
+const FailedBadge = () => <b style={{color: '#db4545'}}>[FAILED]</b>;
+
+const AuditorRenderer = ({ isOK, isFinished, logs }) => {
+  const makeStatusRow = () => {
+    if (isFinished) {
+      return (
+        <span>
+          { isOK ? <PassedBadge /> : <FailedBadge /> }{' '}
+          - audit procedure finished
+        </span>
+      );
+    } else {
+      return (
+        <span>
+          Audit procedure is still running...
+          {
+            isOK
+              ? ''
+              : <span>{' '}
+                  However it has already <FailedBadge />, so any further log
+                  checks are just informational and won't affect final state.
+                </span>
+          }
+        </span>
+      );
+    }
+  };
+
+  return (
+    <ol>
+      <li key="header">HEADER: {makeStatusRow()}</li>
+      {
+        logs.map(
+          (line, i) => <li key={`${i}`}>{line}</li>
+        )
+      }
+      <li key="footer">FOOTER: {makeStatusRow()}</li>
+    </ol>
+  )
+};
+
+function getInitialAuditState() {
+  return {
+    isFinished: false,
+    isOK: true,
+    logs: [],
+  };
+}
+
+function audit(props, onStateChange) {
+  const state = getInitialAuditState();
+  onStateChange(state);
+  setTimeout(() => {
+    onStateChange({
+      ...state,
+      isFinished: true,
+    });
+  }, 5000);
+}
+
+class AuditRoot extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = getInitialAuditState();
+  }
+
+  componentDidMount() {
+    this._start();
+  }
+
+  componentWillUnmount() {
+    this._stop();
+  }
+
+  _start() {
+    this.setState(getInitialAuditState());
+
+    const handlerState = { active: true };
+    const handler = update => {
+      if (handlerState.active) {
+        this.setState({ ...update });
+      };
+    };
+    this._stop = () => {
+      handlerState.active = false;
+      this._stop = null;
+    };
+
+    audit({ ...this.props }, handler);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      this.props.domain !== prevProps.domain ||
+      this.props.forceInstance !== prevProps.forceInstance
+    ) {
+      this._stop();
+      this._start();
+    }
+  }
+
+  render() {
+    return <AuditorRenderer {...this.state} />;
+  }
+}
 
 class Root extends React.Component {
   constructor(props) {

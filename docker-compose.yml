@@ -23,6 +23,8 @@ services:
     build:
       context: .
       dockerfile: nginx/Dockerfile
+      args:
+        - WEBPACK_MODE=production
     container_name: frontend
     environment:
       - BASE_DOMAIN
