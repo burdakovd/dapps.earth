@@ -6,6 +6,7 @@ set -o pipefail
 
 [ ! -z "$SECURITY_GROUP" ]
 [ ! -z "$DEPLOY_ENV" ]
+[ ! -z "$AWS_PROFILE" ]
 
 export DEPLOY_BRANCH=$(. $DEPLOY_ENV && echo $BRANCH)
 
@@ -133,8 +134,8 @@ mkdir -p addresses/$ELASTIC_IP
 (
   echo '{'
   ./scripts/aws_query.py $instance_id $ELASTIC_IP \
-    "$(aws configure get aws_access_key_id --profile provisioner)" \
-    "$(aws configure get aws_secret_access_key --profile provisioner)" | \
+    "$(aws configure get aws_access_key_id --profile "$AWS_PROFILE")" \
+    "$(aws configure get aws_secret_access_key --profile "$AWS_PROFILE")" | \
     sed "s/'/\"/g"
   echo '"description": "links to query the state of this instance"'
   echo '}'
