@@ -78,8 +78,9 @@ const Page = ({ host, instance, onUpdate }) => (
     <p>
       You should not blindly trust verification status from this page, as
       anyone can write things on the Internet. You should carefully read the
-      steps, and ensure each of them proves what it claims to prove. If you
-      find some steps not convincing, file a Github issue.
+      steps, and ensure each of them proves what it claims to prove. This is
+      just software, it does some checks that I have though of, but I may have
+      missed some cases. If you find something missing, file a Github issue.
     </p>
     <p>
       One may prefer to view this page on Github rather than from potentially
@@ -122,13 +123,13 @@ const AuditorRenderer = ({ isOK, isFinished, logs }) => {
       return (
         <span>
           { isOK ? <PassedBadge /> : <FailedBadge /> }{' '}
-          - audit procedure finished
+          - audit procedure finished [{logs.length}/{logs.length}]
         </span>
       );
     } else {
       return (
         <span>
-          Audit procedure is still running...
+          Audit procedure is still running... [{logs.length}/??]
           {
             isOK
               ? ''
@@ -168,6 +169,10 @@ function getInitialAuditState() {
 function onlyNode(nodes) {
   invariant(nodes.length === 1, `expected 1 node, got ${nodes.length}`);
   return nodes.item(0);
+}
+
+function bypassCORSForPublicAPI(url) {
+  return 'https://cors-anywhere.herokuapp.com/' + url;
 }
 
 async function audit({ domain, forceInstance }, onStateChange) {
@@ -253,14 +258,22 @@ async function audit({ domain, forceInstance }, onStateChange) {
       }
     };
 
+    const extractAWSAccessKeyId = (rawurl) => {
+      const url = new URL(rawurl);
+      return nullthrows(url.searchParams.get('AWSAccessKeyId'));
+    };
+
     state.log(`It is claimed that ${domain} is backed by ${referToInstances(instances)}`);
     state.log('So we need to verify two things:')
     state.log(`1) Whether ${referToInstances(instances)} are set up correctly`);
     state.log(`2) Whether domain ${domain} is backed by ${referToInstances(instances)}`);
 
-    const loggedFetch = async url => {
+    const loggedFetch = async (url, CORSProtectedPublicAPI=false) => {
       state.log(<span>Fetching <Link url={url} /></span>);
-      const response = await fetch(url);
+      // TODO: do not bypass CORS unless we are in browser
+      const response = await fetch(
+        CORSProtectedPublicAPI ? bypassCORSForPublicAPI(url) : url,
+      );
       if (response.status !== 200) {
         throw new Error(`fetch error: ${response.status}: ${response.statusText}`);
       }
@@ -417,7 +430,9 @@ async function audit({ domain, forceInstance }, onStateChange) {
       );
     }
 
-    state.log(`We established that ${referToInstances(instances)} were initialized correctly.`);
+    state.log(
+      `We established that ${referToInstances(instances)} were initialized correctly.`,
+    );
     state.log(
       'However, one way to tamper with an instance would be to attach a \
       malicious EBS volume to it, and then reboot it, hoping it will load OS \
@@ -433,10 +448,105 @@ async function audit({ domain, forceInstance }, onStateChange) {
       months.',
     );
     state.log(
-      'It is important to ensure that metrics query is running on the same \
-      AWS account that owns EC2 instances. It is also important that it runs \
-      as root, otherwise there is a chance that some EBS volumes are invisible \
-      to the query.'
+      `It is important to ensure that metrics query is running on the same \
+      AWS account that owns EC2 instances (${instancesAccountOwner}). \
+      It is also important that it runs as root, otherwise there is a \
+      chance that some EBS volumes are invisible to the query.`
+    );
+    const accountURLs = await loggedFetch(
+      `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/accounts/${instancesAccountOwner}.json`
+    ).then(response => response.json());
+    assertURLMatchesPattern(
+      accountURLs.GU,
+      `https://iam.amazonaws.com/?Action=GetUser&Version=2010-05-08&Expires=2025-01-01`,
+    );
+    state.log('Verified that the GetAccount URL is calling correct API');
+    const getUserResponse = await loggedFetch(
+      accountURLs.GU,
+      true,
+    ).then(response => response.text())
+    .then(text => (new window.DOMParser()).parseFromString(text, "application/xml"));
+    invariant(
+      getUserResponse.documentElement.namespaceURI === 'https://iam.amazonaws.com/doc/2010-05-08/',
+      'Bad response xmlns',
+    );
+    const tentativelyRootKey = extractAWSAccessKeyId(accountURLs.GU);
+    const awsUserName = onlyNode(
+      getUserResponse.querySelectorAll('GetUserResult > User > UserName'),
+    ).textContent;
+    if (awsUserName === 'root') {
+      state.log(
+        `Verified that key ${tentativelyRootKey} belongs to root account`,
+      );
+    } else {
+      state.fail(
+        `This query should have run as root, got ${awsUserName} instead`,
+      );
+    }
+    const awsUserARN = onlyNode(
+      getUserResponse.querySelectorAll('GetUserResult > User > Arn'),
+    ).textContent;
+    const desiredArn = `arn:aws:iam::${instancesAccountOwner}:user/${awsUserName}`;
+    if (awsUserARN === desiredArn) {
+      state.log(
+        `Verified that key ${tentativelyRootKey} belongs to AWS account \
+        ${instancesAccountOwner}`,
+      );
+    } else {
+      state.fail(
+        `This query should have run as the same AWS account that owns EC2 \
+        instances (${instancesAccountOwner}), got ${awsUserARN} instead`,
+      );
+    }
+
+    const rootKey = tentativelyRootKey;
+    state.log(
+      `Now we know ${rootKey} is the key to make queries on the account
+      that owns EC2 instances (${instancesAccountOwner}) with root privileges`,
+    );
+
+    assertURLMatchesPattern(
+      accountURLs.LM,
+      `https://monitoring.us-east-1.amazonaws.com/?Action=ListMetrics&Expires=2025-01-01&MetricName=VolumeReadBytes&Namespace=AWS%2FEBS&Version=2010-08-01`,
+    );
+    state.log('Verified that the ListMetrics URL is calling correct API');
+    if (extractAWSAccessKeyId(accountURLs.LM)) {
+      state.log(`Verified that ListMetrics URL is using good key ${rootKey}`);
+    } else {
+      state.fail(
+        `ListMetrics URL should be using ${rootKey} but is using \
+        ${extractAWSAccessKeyId(accountURLs.LM)}`,
+      );
+    }
+    const listMetricsResponse = await loggedFetch(
+      accountURLs.LM,
+    ).then(response => response.text())
+    .then(text => (new window.DOMParser()).parseFromString(text, "application/xml"));
+    invariant(
+      listMetricsResponse.documentElement.namespaceURI === 'http://monitoring.amazonaws.com/doc/2010-08-01/',
+      'Bad response xmlns',
+    );
+    const numMetrics = listMetricsResponse.querySelectorAll(
+      'ListMetricsResult > Metrics > member',
+    ).length;
+    state.log(`Found ${numMetrics} metrics.`);
+    if (numMetrics === 0) {
+      state.log(
+        `Verified that account ${instancesAccountOwner} had no EBS drives in \
+        the past 15 months`,
+      );
+    } else {
+      state.fail(
+        `ListMetrics shows ${numMetrics} metrics, it seems AWS account \
+        owner has some EBS drives`,
+      );
+    }
+
+    state.log(
+      `By now we have confirmed the integrity of ${referToInstances(instances)}`,
+    );
+    state.log(
+      `Next step would be to check whether ${domain} is backed by ${referToInstances(instances)}`,
     );
 
     throw new Error('WIP');
