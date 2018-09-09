@@ -7,6 +7,12 @@ import trustedAMIs from './ami.json';
 import invariant from 'invariant';
 import nullthrows from 'nullthrows';
 
+function sorted(a) {
+  const b = [...a];
+  b.sort();
+  return b;
+}
+
 const Link = ({url}) => {
   return <a href={url}>{url}</a>;
 };
@@ -68,6 +74,13 @@ const Page = ({ host, instance, onUpdate }) => (
       procedure is largely based on great ideas from{' '}
       <a href="https://github.com/tlsnotary/pagesigner-oracles/blob/master/INSTALL.oracles">TLSNotary setup</a>,
       as they've solved similar problem several years ago.
+    </p>
+    <p>
+      In one sentence, the
+      audit consists of veryfying that EC2 instances were launched without SSH
+      key, with well-known user data script, the AWS account doesn't have
+      any EBS volumes, and domain name {host} points to IP addresses that are
+      associated with "good" instances.
     </p>
     <p>
       Once the instance is provisioned, it will receive code updates from{' '}
@@ -249,6 +262,11 @@ async function audit({ domain, forceInstance }, onStateChange) {
         'Signature',
         'SignatureMethod',
         'SignatureVersion',
+        'X-Amz-Date',
+        'X-Amz-Algorithm',
+        'X-Amz-Credential',
+        'X-Amz-SignedHeaders',
+        'X-Amz-Signature',
       ];
       for (const [k, v] of urlParams.entries()) {
         invariant(
@@ -369,6 +387,15 @@ async function audit({ domain, forceInstance }, onStateChange) {
           'Instances are owned by different accounts',
         );
       }
+
+      const ipAddress = onlyNode(
+        response.querySelectorAll(
+          'reservationSet > item > instancesSet > item > ipAddress',
+        ),
+      ).textContent;
+      state.log(
+        `Established that IP ${ipAddress} points to ${instanceWithURLs.instance}`,
+      );
     }
 
     state.log(
@@ -549,7 +576,188 @@ async function audit({ domain, forceInstance }, onStateChange) {
       `Next step would be to check whether ${domain} is backed by ${referToInstances(instances)}`,
     );
 
-    throw new Error('WIP');
+    const zoneConfig = await loggedFetch(
+      `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/zones/${domain}`,
+    ).then(response => response.json());
+
+    state.log(
+      `It is claimed that ${domain} DNS is managed by zone ${zoneConfig.zone}`,
+    );
+
+    state.log(
+      'We can verify that by comparing domain NS servers with zone delegation set.',
+    );
+
+    const domainNS = await loggedFetch(
+      `https://dns-api.org/NS/${domain}`,
+    ).then(response => response.json()).then(
+      rows => rows.filter(row => row.name === domain + '.' && row.type === 'NS')
+    ).then(
+      rows => JSON.stringify(sorted(rows.map(row => row.value.replace(/\.$/, '')))),
+    );
+
+    state.log(`Domain NS records: ${domainNS}`);
+
+    const getZoneUnsignedURL = `https://route53.amazonaws.com/2013-04-01/hostedzone/${zoneConfig.zone}/`;
+    const getZoneURL = await loggedFetch(
+      `${zoneConfig.signer}zone/${domain}/${getZoneUnsignedURL}`
+    ).then(r => r.text());
+    assertURLMatchesPattern(getZoneURL, getZoneUnsignedURL);
+    state.log(`Confirmed that signed URL is not modified`);
+
+    const getZoneResponse = await loggedFetch(getZoneURL).then(
+      r => r.text()
+    ).then(
+      text => (new window.DOMParser()).parseFromString(text, "application/xml"),
+    );
+
+    invariant(
+      getZoneResponse.documentElement.namespaceURI === 'https://route53.amazonaws.com/doc/2013-04-01/',
+      'Bad response xmlns',
+    );
+
+    const delegationServers = JSON.stringify(
+      sorted(Array.from(getZoneResponse.querySelectorAll(
+        'DelegationSet > NameServers > NameServer',
+      )).map(node => node.textContent)),
+    );
+
+    state.log(`Zone delegation NS records: ${delegationServers}`);
+    if (delegationServers === domainNS) {
+      state.log(
+        'Confirmed that NS records of domain match zone delegation records',
+      );
+    } else {
+      state.fail(
+        'NS records of domain DO NOT match zone delegation records',
+      );
+    }
+
+    state.log(
+      `Now that we've verified ${domain} DNS is managed by zone \
+      ${zoneConfig.zone}, we can check which IP addresses it resolves to`,
+    );
+
+    const getZoneRecordsUnsignedURL = `https://route53.amazonaws.com/2013-04-01/hostedzone/${zoneConfig.zone}/rrset/`;
+    const getZoneRecordsURL = await loggedFetch(
+      `${zoneConfig.signer}zone/${domain}/${getZoneRecordsUnsignedURL}`
+    ).then(r => r.text());
+    assertURLMatchesPattern(getZoneRecordsURL, getZoneRecordsUnsignedURL);
+    state.log(`Confirmed that zone records signed URL is not modified`);
+
+    const getZoneRecordsResponse = await loggedFetch(getZoneRecordsURL).then(
+      r => r.text()
+    ).then(
+      text => (new window.DOMParser()).parseFromString(text, "application/xml"),
+    );
+
+    invariant(
+      getZoneRecordsResponse.documentElement.namespaceURI === 'https://route53.amazonaws.com/doc/2013-04-01/',
+      'Bad response xmlns',
+    );
+    invariant(
+      onlyNode(
+        getZoneRecordsResponse.querySelectorAll(
+          'IsTruncated',
+        ),
+      ).textContent === 'false',
+      'Results are truncated, and this page does not support pagination yet',
+    );
+
+    const ipAddresses = [];
+    const handleDNSRecord = (name, type, value) => {
+      state.log(JSON.stringify({ name, type, value }));
+
+      if (type === 'A') {
+        if (ipAddresses.find(x => x === value) == null) {
+          ipAddresses.push(value);
+        }
+      } else if (name === domain + '.' && type === 'NS') {
+        // skip
+      } else if (name === 'staging.' + domain + '.' && type === 'NS') {
+        // skip
+      } else if (name === 'staging-2.' + domain + '.' && type === 'NS') {
+        // skip
+      } else if (name === domain + '.' && type === 'SOA') {
+        // skip
+      } else if (name.startsWith('_acme-challenge.')) {
+        // skip
+      } else if (name === 'acme-dns.' + domain + '.') {
+        // skip
+      } else {
+        state.fail('Unrecognized DNS record observed: ' + JSON.stringify({ name, type, value }));
+      }
+    };
+
+    for (const node of getZoneRecordsResponse.querySelectorAll(
+      'ResourceRecordSets > ResourceRecordSet > ResourceRecords > ResourceRecord > Value',
+    )) {
+      const value = node.textContent;
+      const name = Array.from(node.parentNode.parentNode.parentNode.childNodes).filter(
+        node => node.nodeName === 'Name',
+      )[0].textContent;
+      const type = Array.from(node.parentNode.parentNode.parentNode.childNodes).filter(
+        node => node.nodeName === 'Type',
+      )[0].textContent;
+      handleDNSRecord(name, type, value);
+    }
+
+    state.log(
+      `Observed the following IP addresses for ${domain}: \
+      ${JSON.stringify(ipAddresses)}. Now for each IP address we need to check \
+      whether it points to a "good" EC2 instance.`,
+    );
+
+    const addressesWithURLs = await Promise.all(
+      ipAddresses.map(
+        async address => {
+          const urls = await loggedFetch(
+            `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/addresses/${address}/urls.json`,
+          ).then(r => r.json());
+          return { address, urls };
+        },
+      )
+    );
+
+    addressesWithURLs.forEach(
+      ({ address, urls }) => assertURLMatchesPattern(
+        urls.DA,
+        `https://ec2.us-east-1.amazonaws.com/?Action=DescribeAddresses&Expires=2025-01-01&PublicIp=${address}&Version=2014-10-01`,
+      ),
+    );
+    state.log('Verified that DescribeAddresses URLs point to the correct API');
+
+    for (const addressWithURLs of addressesWithURLs) {
+      const response = await loggedFetch(addressWithURLs.urls.DA).then(
+        async response => await response.text(),
+      ).then(
+        text => (new window.DOMParser()).parseFromString(text, "application/xml"),
+      );
+      invariant(
+        response.documentElement.namespaceURI === 'http://ec2.amazonaws.com/doc/2014-10-01/',
+        'Bad response xmlns',
+      );
+      const instance = onlyNode(
+        response.querySelectorAll('addressesSet > item > instanceId'),
+      ).textContent;
+      state.log(
+        `Address ${addressWithURLs.address} is attached to ${instance}.`,
+      );
+      if (instances.find(x => x === instance) != null) {
+        state.log(
+          `It was earlier verified that instance ${instance} is good.`,
+        );
+      } else {
+        state.fail(
+          `Instance ${instance} is unknown`,
+        );
+      }
+    }
+
+    state.log(
+      'Done. We have identified a set of "good" instances, verified that \
+      DNS points to IP addresses that are attached to those good instances.',
+    );
   } catch (e) {
     state.fail(`crash: ${e.toString()}`);
     state.log(
