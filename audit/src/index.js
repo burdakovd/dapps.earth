@@ -510,7 +510,7 @@ async function audit({ domain, forceInstance }, onStateChange) {
       `https://monitoring.us-east-1.amazonaws.com/?Action=ListMetrics&Expires=2025-01-01&MetricName=VolumeReadBytes&Namespace=AWS%2FEBS&Version=2010-08-01`,
     );
     state.log('Verified that the ListMetrics URL is calling correct API');
-    if (extractAWSAccessKeyId(accountURLs.LM)) {
+    if (extractAWSAccessKeyId(accountURLs.LM) == rootKey) {
       state.log(`Verified that ListMetrics URL is using good key ${rootKey}`);
     } else {
       state.fail(
