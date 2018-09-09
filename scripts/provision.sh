@@ -2,6 +2,8 @@
 
 # Launch a new instance on AWS, attach existing or new elastic IP to it
 
+set -o pipefail
+
 [ ! -z "$SECURITY_GROUP" ]
 [ ! -z "$DEPLOY_ENV" ]
 
@@ -9,8 +11,7 @@ export DEPLOY_BRANCH=$(. $DEPLOY_ENV && echo $BRANCH)
 
 [ ! -z "$DEPLOY_BRANCH" ]
 
-AMI_AMAZON_LINUX2=ami-04681a1dbd79675a5
-
+AMI_AMAZON_LINUX=ami-0130c3a072f3832ff
 USER_DATA="$(mktemp)"
 
 instance_id=$(
@@ -66,11 +67,13 @@ instance_id=$(
         echo \"This machine has debug key <$DEBUG_KEY_NAME> attached\"
         echo \"Holder of that key has ROOT access to the machine\"
       ) >> /var/log/dapps.earth-integrity/provision.txt"
+      echo "export HAS_DEBUG_KEY=1"
     else
       echo "(
         echo \"This machine has no debug key attached\"
         echo \"Access is restricted to only for Travis deploys\"
       ) >> /var/log/dapps.earth-integrity/provision.txt"
+      echo "export HAS_DEBUG_KEY=0"
     fi
     echo "echo '' >> /var/log/dapps.earth-integrity/provision.txt"
     echo "(
@@ -91,11 +94,12 @@ instance_id=$(
   echo "Script size: $(bash -o pipefail -c "$SOURCE" | wc -c)" >&2
   echo "User data size: $(wc -c < $USER_DATA)" >&2
 
-  aws ec2 run-instances \
-    --image-id $AMI_AMAZON_LINUX2 \
+  instance_id=$(aws ec2 run-instances \
+    --image-id $AMI_AMAZON_LINUX \
     --security-group-ids "$SECURITY_GROUP" \
     --count 1 \
-    --instance-type t2.medium \
+    --iam-instance-profile Name="logger" \
+    --instance-type m1.small \
     --query 'Instances[0].InstanceId' \
     --user-data file://$USER_DATA \
     $(if [ ! -z "$DEBUG_KEY_NAME" ]; then \
@@ -104,10 +108,40 @@ instance_id=$(
     else \
       true; \
     fi) \
-    --output text
+    --output text \
+  )
+
+  mkdir instances/$instance_id
+  cp $USER_DATA instances/$instance_id/provision-user-data.sh
+
+  echo $instance_id
 )
 
+[ ! -z "$instance_id" ]
+
 echo "Launched instance $instance_id"
+
+if [ -z "$ELASTIC_IP" ]; then
+  export ELASTIC_IP=$(aws ec2 allocate-address --output=json | jq -r ".PublicIp")
+  echo "Allocated elastic IP $ELASTIC_IP" >&2
+fi
+
+[ ! -z "$ELASTIC_IP" ]
+
+mkdir -p addresses/$ELASTIC_IP
+
+(
+  echo '{'
+  ./scripts/aws_query.py $instance_id $ELASTIC_IP \
+    "$(aws configure get aws_access_key_id --profile provisioner)" \
+    "$(aws configure get aws_secret_access_key --profile provisioner)" | \
+    sed "s/'/\"/g"
+  echo '"description": "links to query the state of this instance"'
+  echo '}'
+) | jq . | tee >(cat >&2) | \
+  tee >(jq 'del(.DA)' > instances/$instance_id/urls.json) | \
+  jq '{DA}' > addresses/$ELASTIC_IP/urls.json
+
 echo "Waiting for $instance_id to start..."
 
 aws ec2 wait instance-running --instance-ids $instance_id

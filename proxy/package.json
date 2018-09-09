@@ -12,10 +12,11 @@
     "start": "node app.js"
   },
   "engines": {
-    "node": "8.9.1"
+    "node": "10"
   },
   "dependencies": {
     "http-proxy": "*",
-    "cids": "^0.5.3"
+    "cids": "^0.5.3",
+    "base32.js": "*"
   }
 }

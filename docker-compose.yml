@@ -3,21 +3,29 @@ version: '3'
 # Need to provide the following environment variables when running:
 # - BASE_DOMAIN (accessible to target audience, not necessarily public internet)
 # - NS_DOMAIN (accessible to public internet)
+# - IS_LARGE (whether we are starting a large node)
+# - RUN_LOCAL_SWARM (whether we are running own Swarm node vs using public gw)
 
 services:
   proxy:
     restart: always
     build: proxy
+    container_name: proxy
     environment:
       - BASE_DOMAIN
       - HAS_SSL=1
+      - RUN_LOCAL_SWARM
     depends_on:
       - ipfs
+      - swarm
   frontend:
     restart: always
     build:
       context: .
       dockerfile: nginx/Dockerfile
+      args:
+        - WEBPACK_MODE=production
+    container_name: frontend
     environment:
       - BASE_DOMAIN
     volumes:
@@ -29,13 +37,16 @@ services:
     depends_on:
       - proxy
       - ssl-renewer
+      - geth
+      - swarm
   ssl-renewer:
     restart: always
     build: ssl-renewer
+    container_name: ssl-renewer
     environment:
       - BASE_DOMAIN
       - NS_DOMAIN
-      - HOSTS=$BASE_DOMAIN *.$BASE_DOMAIN *.ipfs.$BASE_DOMAIN *.swarm.$BASE_DOMAIN *.eth.swarm.$BASE_DOMAIN
+      - HOSTS=$BASE_DOMAIN *.$BASE_DOMAIN *.ipfs.$BASE_DOMAIN *.eth.bzz.$BASE_DOMAIN *.eth.bzz-hash.$BASE_DOMAIN *.bzz-immutable.$BASE_DOMAIN
       - MAX_SSL_CERTIFICATE_AGE_DAYS=14
     volumes:
       - ssl-renewer-successes:/successes
@@ -45,12 +56,43 @@ services:
   ipfs:
     restart: always
     build: ipfs
+    container_name: ipfs
     ports:
       - "4001:4001"
     volumes:
       - ipfs-data:/data/ipfs
+    environment:
+      - IS_LARGE
+      - RUN_LOCAL_SWARM
+  geth:
+    restart: always
+    build: geth
+    container_name: geth
+    ports:
+      - "30303:30303"
+      - "30303:30303/udp"
+    volumes:
+      - geth-data:/home/gethuser/.ethereum
+    environment:
+      - RUN_LOCAL_SWARM
+  swarm:
+    restart: always
+    build: swarm
+    container_name: swarm
+    depends_on:
+      - geth
+    volumes:
+      - swarm-data:/home/swarmuser/data
+    ports:
+      - "30399:30399"
+      - "30399:30399/udp"
+    environment:
+      - IS_LARGE
+      - RUN_LOCAL_SWARM
 
 volumes:
   ssl-renewer-successes:
   certs:
   ipfs-data:
+  geth-data:
+  swarm-data:

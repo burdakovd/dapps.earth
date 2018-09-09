@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+if [ ! -z "$JUST_PRINT_AUDIT_PAGE" ]; then
+  cat /var/www/static/audit.html
+  exit 0
+fi
+
 [ ! -z "$BASE_DOMAIN" ]
 
 sed "s/BASE_DOMAIN/$BASE_DOMAIN/g" /etc/nginx/nginx-template.conf \

@@ -2,17 +2,20 @@ DOCKER_COMPOSE_VERSION: 1.22.0
 
 env:
   global:
-    # TRAVIS_PASSWORD_21eed794827f82d1 (to deploy .env.staging)
-    - secure: "aHrpNMBnYAs3ksSUbPUXhBv7Q2BVcUUela2WNB3BKX06mfkgnSaNeKxN6tasyPt2ZU/b3MX/ghpjgpyUBfppE8hJdYwP0mK2p6tTetrlfn5+mP18t4ZG1Ist8Am9gM4IRX6X15Dg3j/fDm6IT5ftcd5G26mo70uUfvYi+4mlhsWOOCgg6e9F/GHeDeWo4jrYu/JCyDd7zz1s424zUy+8jeZcA7xVaIIwNXQClnrT/Inj8G/LBemiZc8R0gITimiEfuAZNY3Y/ZvlQE0+eSPSMdnIkceSYk9SRiypa7Bxr1IvUVIaGjH51QtBZEg9yVdXtIMfLX2DyuROKDKSdPnI7I8ypcSn64zyshlNti3NxIJvkzCXhIeVK+c+yfWjzGyKA5B1DYTLWH8BaSbUloWvvIMvQC8mtk9360nTCoNHVX000FJj7EEbBFPghvuNVPBSl5ifk/5imWlQYeba4fDl86A6t2/BQe1dll+gnRC1VJ9gHN26SJh5l9vjFPhpsgPDLlGg9l4iZCO38Svhy8SnEUq1hVy00YfqphczqGsQ+CyOzrIVA479zCYOcFQqPVovn0t+GALsXNrx+jnhjTmdMHVVy+mePQ+/D3J7HZNa/6Fxr9y7W2ro2GEf9Pqb/U699wjkTrQTeo7OTNfTZSOnt3pxwZSs8kIAoKMX1aagZ3g="
+    # TRAVIS_PASSWORD_ff8ee60ce2331014 (to deploy .env.staging)
+    - secure: "bosqDoO/uqyxZIM2tOGtkjhhoVygwF8Wz8UXKWFNxEb25H1ASezNpjH1XHA3lwFxFgB7v+DB7++3VyVvagcgCCT4MtuT8JJbK+bGsCjIT2a+WGU+WMMBP8PCmYDHKv/Xr8yiacaPz9PD4FXfHK1FPmZmo1l/GhvNv5OgxhqF+ByuP1qHWvhgyd9x3wmQ8XyJZGMI5fb+X0yGQCzdQEK5cLmmFEboQpZFNJ7IhpmpzEyczC7rGGQKVVsz8GKJvgrpUNv/HhA47wzQ8Fo6DieW+xJ4GzSfqIwcckpRhFfYd9tmLOoijpB9tIqsYwHIJQbYDS3QTvsLXDmpU/i6UWwZlUVNhtGZugI8VRJAUooICz/688GVZnJEjzqxmvhdv+nPVv7LNv/HbWaD9z7j7WWTk2B59dvyN0FMw1MN98LVDOD5cz3Q86oyvE1hOSw6Zpi+koa66WDXG34wJnmnwsSoQgwSK5HgFQsQDsk8Q/z/M7E9ZshLJnGns0QtsVux9tst9C26WzZ5vb+MzOGoX9nsm6uqpjXetCFBSRrQcEVRLkZbmqrJKVnvZK76CfiAMJnYG7rUs+LrKI4y5ClLcfu71L99Q/7o2kmzeP+gAEn9xRygj6fLFPtzL/vYtKGzZSgVJbSXga/EI/GAC1wwU1MSD/ocJgLOterRJLxsmI6iSSc="
     # TRAVIS_PASSWORD_6998d03f8b7f08a4 (to deploy .env)
     - secure: "bNF+HjCB1Xz8vF4K1v8RTA26KD3rDvGg7NaCR1z0O+w1PRyjOgedQbWyAM1+t+IRZ9rVqIsQ6CavSae88x5rPKHE1IKjrgBrOi1mpYYm+9XumLPRaVxwE9RaaQGtjkPwk3mo/UW+4RppkXpUyr0kcSSf5W21keTe8ryEb5gghL6pfvHaL6WB1/tfBap/Ih0PvWF3kbI/zi8xYNiGBm3EkzPpCYawvjnJwlLBBx0ZZPSd3LJSe3lT0vx3uML78e1svCUDdClue6iF25kMfufNxpWaomKfevMNBW2MBN9poBt9eNXVRp3FadAEep4emgEs/BGRa849Fh4ZG3vO7K8op3EZ4/s3ej57iFsw5q8FdVaE0o60Go2hwHqxybaU5zTgmSaDkEn8kbptzATszCWcLXms+57uY7n6KPKvaG9tAc0hbHRm7brWlLSB5qkCkvSdoQbzriZwT3GbhhLa7VpexQp/uQf+bHu/2vU10SPFHcX/6VLUVb4XFbNC/CiwV72kdFp6BtHCSMCeiQ9sKyEHd0iROy1MzTKUT++KcY3PShSkXl2IeF0Y3i2FqhJw+A67g2o2ga4uYn8L7c1XJlSnFkziPHL4lWsYC79zkWA2HZIF09h60RF7PPoAagglNQNQCDyfE57s9zd+Qt/pl+a5NoQb71bTQYPDgCuOsZf3O6M="
 
 before_install:
-  - sudo apt-get install jq
+  - sudo apt-get install jq dnsutils
 
 script:
   - docker-compose pull
   - docker-compose build
+  - docker run -e JUST_PRINT_AUDIT_PAGE=1 dappsearth_frontend > audit.html.expected
+  - diff audit.html audit.html.expected
+  - rm -f audit.html.expected
 
 after_success:
   - ./scripts/travis-deploy.sh .env.staging

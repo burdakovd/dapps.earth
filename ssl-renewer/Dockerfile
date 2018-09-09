@@ -10,22 +10,47 @@ RUN \
     sha256sum -c - && \
   chmod 755 /usr/local/bin/dumb-init
 
-FROM neilpang/acme.sh
+FROM alpine:latest
 
-RUN apk update && apk add bash bc bind-tools python2 py-pip git
+RUN apk update && apk --no-cache add bash bc bind-tools python2 py-pip \
+  git sudo openssl coreutils curl socat \
+  && rm -rf /var/cache/apk/*
 
 RUN pip install docutils && pip install python-daemon
 RUN pip install git+git://github.com/paulchakravarti/dnslib.git@986861873ee6131dae60820b8a804f710f87dd8
-RUN addgroup -S nano-dns && adduser -S -G nano-dns nano-dns
 
 COPY --from=0 /usr/local/bin/dumb-init /usr/local/bin/dumb-init
-COPY start.sh ./
-COPY nano-dns.py ./
+COPY start.sh /bin/start.sh
+COPY nano-dns.py /bin/nano-dns.py
+RUN chown root:root /bin/nano-dns.py /bin/start.sh && \
+  chmod 555 /bin/nano-dns.py /bin/start.sh
 
-VOLUME /acme-dns-auth
 VOLUME /successes
 VOLUME /etc/nginx/certs
 
+RUN adduser -s /bin/bash -S -u 1000 -G users renewer
+RUN addgroup -S nano-dns
+RUN adduser -s /bin/bash -S -u 1001 -G nano-dns nano-dns
+
+RUN echo \
+  "renewer ALL=(root) NOPASSWD: /bin/nano-dns.py nano-dns /nanodns/config.txt" >> \
+  /etc/sudoers
+RUN echo \
+  "renewer ALL=(nano-dns) NOPASSWD: /bin/cat /etc/nginx/certs/perm-test" >> \
+  /etc/sudoers
+
+USER renewer
+
+RUN cd /home/renewer && \
+  git clone https://github.com/Neilpang/acme.sh.git && \
+  cd ./acme.sh && \
+  mkdir /home/renewer/.acme.sh && \
+  mv acme.sh /home/renewer/.acme.sh/ && \
+  cd /home/renewer && \
+  rm -rf ./acme.sh
+
+USER root
+
 ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 
-CMD ["./start.sh"]
+CMD ["/bin/start.sh"]

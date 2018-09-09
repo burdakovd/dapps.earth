@@ -1,20 +1,60 @@
 #!/bin/bash -e
 
-[ ! -z "$HOSTS" ]
+[ ! -z "$HOSTS" ] || (echo 'HOSTS var is missing' >&2 && false)
 [ ! -z "$BASE_DOMAIN" ]
 [ ! -z "$NS_DOMAIN" ]
 
-CACHE_VERSION=7
+SCRIPT="$( cd "$(dirname "$0")" ; pwd -P )/start.sh"
+user=$(whoami)
+
+whoami
+
+if test "$user" = 'root'; then
+  ls -lh /etc/nginx
+  ls -lh /etc/nginx/certs || true
+  chown -R renewer:users /etc/nginx/certs
+  chmod -R u=rwx,g=rx,o= /etc/nginx/certs
+  chown -R renewer:users /successes
+
+  mkdir -p /nanodns
+  chown -R renewer:users /nanodns
+  # give nanodns permission to read the config
+  chmod o+rx /nanodns
+
+  echo "dropping root privileges"
+  cd /
+  exec su renewer -c "exec bash -e $SCRIPT"
+fi
+
+test "$user" = 'renewer'
+
+umask 027
+
+ls -lh /etc/nginx
+ls -lh /etc/nginx/certs
+
+rm -f /etc/nginx/certs/perm-test
+: > /etc/nginx/certs/perm-test
+
+if sudo -nu nano-dns /bin/cat /etc/nginx/certs/perm-test; then
+  echo "bad user setup"
+  false
+else
+  echo "good, nano-dns can't read certs"
+fi
+rm -f /etc/nginx/certs/perm-test
+
+CACHE_VERSION=8
 
 function record_success() {
   HOST="$1"
-  encoded=$(echo "$CACHE_VERSION.$HOST" | base64)
+  encoded=$(echo "$CACHE_VERSION.$HOST" | sha256sum | awk '{print $1}')
   date >> "/successes/$encoded"
 }
 
 function is_fresh() {
   HOST="$1"
-  encoded=$(echo "$CACHE_VERSION.$HOST" | base64)
+  encoded=$(echo "$CACHE_VERSION.$HOST" | sha256sum | awk '{print $1}')
   file="/successes/$encoded"
   if [ ! -f "$file" ]; then
     echo "We haven't ever received a certificate for $HOST"
@@ -35,13 +75,13 @@ function is_fresh() {
   fi
 }
 
-mkdir -p /nanodns
 NANODNS_CONFIG="/nanodns/config.txt"
 rm -f $NANODNS_CONFIG
 
 nanodns_start() {
   : > $NANODNS_CONFIG || return 1
-  python nano-dns.py nano-dns $NANODNS_CONFIG || return 1
+  chmod o+r $NANODNS_CONFIG
+  sudo -n /bin/nano-dns.py nano-dns $NANODNS_CONFIG || return 1
 }
 
 nanodns_stop() {
@@ -73,7 +113,7 @@ while true; do
   IS_DNS_GOOD=1
   echo "  acme-dns.$BASE_DOMAIN NS => $NS_DOMAIN"
   echo "  $NS_DOMAIN should resolve to a public IP address of this server"
-  nanodns_start
+  nanodns_start || exit 1
   TEST_SUB="test-$(date +%s)"
   # Add a test record to later verify that things work well
   echo $TEST_SUB >> $NANODNS_CONFIG
@@ -91,7 +131,7 @@ while true; do
   if [ "$IS_DNS_GOOD" -eq "1" ]; then
     if ! is_fresh "$HOSTS"; then
       echo "Making certificate request for $HOSTS..."
-      acme.sh \
+      ~/.acme.sh/acme.sh \
         --debug \
         --force \
         --issue \
@@ -102,8 +142,9 @@ while true; do
         echo "Got certificate for $HOSTS..."
         HOST=$(echo $HOSTS | awk '{print $1}')
         SANITIZED_HOST=$(echo $HOST | sed 's/[*]/wildcard/')
+        ls -lh /etc/nginx
         mkdir -p /etc/nginx/certs/$SANITIZED_HOST
-        acme.sh --install-cert -d $HOST \
+        ~/.acme.sh/acme.sh --install-cert -d $HOST \
           --cert-file /etc/nginx/certs/$SANITIZED_HOST/cert \
           --key-file /etc/nginx/certs/$SANITIZED_HOST/key \
           --fullchain-file /etc/nginx/certs/$SANITIZED_HOST/fullchain \
