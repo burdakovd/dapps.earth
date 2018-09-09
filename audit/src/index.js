@@ -255,8 +255,8 @@ async function audit({ domain, forceInstance }, onStateChange) {
 
     state.log(`It is claimed that ${domain} is backed by ${referToInstances(instances)}`);
     state.log('So we need to verify two things:')
-    state.log(`1) Whether domain ${domain} is backed by ${referToInstances(instances)}`);
-    state.log(`2) Whether ${referToInstances(instances)} are set up correctly`);
+    state.log(`1) Whether ${referToInstances(instances)} are set up correctly`);
+    state.log(`2) Whether domain ${domain} is backed by ${referToInstances(instances)}`);
 
     const loggedFetch = async url => {
       state.log(<span>Fetching <Link url={url} /></span>);
@@ -416,6 +416,28 @@ async function audit({ domain, forceInstance }, onStateChange) {
         repository and run it',
       );
     }
+
+    state.log(`We established that ${referToInstances(instances)} were initialized correctly.`);
+    state.log(
+      'However, one way to tamper with an instance would be to attach a \
+      malicious EBS volume to it, and then reboot it, hoping it will load OS \
+      from the attached volume. It is unlikely, but to protect against this, \
+      we require that AWS account owner does not have any EBS volumes.',
+    );
+    state.log(
+      'We can verify absense of EBS volumes by doing GetMetrics call with \
+      metric VolumeReadBytes. It will return "slice" of that metric per EBS \
+      volume, so if there is any volume in the account, results will be not \
+      empty. CloudWatch metrics have retention of 15 months, so empty list \
+      proves that there have not been any EBS drives in the account for 15 \
+      months.',
+    );
+    state.log(
+      'It is important to ensure that metrics query is running on the same \
+      AWS account that owns EC2 instances. It is also important that it runs \
+      as root, otherwise there is a chance that some EBS volumes are invisible \
+      to the query.'
+    );
 
     throw new Error('WIP');
   } catch (e) {

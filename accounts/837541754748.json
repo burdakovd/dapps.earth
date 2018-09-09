@@ -1,0 +1,4 @@
+{
+  "GU": "https://iam.amazonaws.com/?AWSAccessKeyId=AKIAIW2P65Z4GQF5X4VA&Action=GetUser&Expires=2025-01-01&SignatureMethod=HmacSHA256&SignatureVersion=2&Version=2010-05-08&Signature=7PzDIsyGMwhO8wKFaB233OwsL1WPOTvbXU3ThEbGjyQ%3D",
+  "LM": "https://monitoring.us-east-1.amazonaws.com/?AWSAccessKeyId=AKIAIW2P65Z4GQF5X4VA&Action=ListMetrics&Expires=2025-01-01&MetricName=VolumeReadBytes&Namespace=AWS%2FEBS&SignatureMethod=HmacSHA256&SignatureVersion=2&Version=2010-08-01&Signature=XIx3QlnP8pJH9asqP%2BC%2B3Csxi7Fhmu6LEofmRlhcyRQ%3D"
+}
