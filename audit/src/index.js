@@ -3,17 +3,8 @@ import React from 'react';
 import 'typebase.css';
 import 'formbase/dist/formbase.min.css';
 import './button.css';
-import trustedAMIs from './ami.json';
-import invariant from 'invariant';
-import nullthrows from 'nullthrows';
 import { audit, getInitialAuditState, FailedBadge, PassedBadge } from './audit';
 import { Link } from './common';
-
-function sorted(a) {
-  const b = [...a];
-  b.sort();
-  return b;
-}
 
 const GithubLink = () => {
   const url = 'https://github.com/burdakovd/dapps.earth';
@@ -45,7 +36,7 @@ class ChangeParamsForm extends React.Component {
           } />
         </label>
         <label>
-          Choose AWS instance to audit (leave empty to infer from domain):{' '}
+          Add extra AWS EC2 instance to audit (most likely you don't need this):{' '}
           <input className="input" type="text" value={this.state.instance} onChange={
             this.handleChangeInstance
           } />
@@ -75,23 +66,25 @@ const Page = ({ host, instance, onUpdate }) => (
     </p>
     <p>
       In one sentence, the
-      audit consists of veryfying that EC2 instances were launched without SSH
-      key, with well-known user data script, the AWS account doesn't have
-      any EBS volumes, and domain name {host} points to IP addresses that are
-      associated with "good" instances.
+      audit consists of identifying which EC2 instance are behind the domain,
+      and then verifying that they were launched from well-known AMI, without
+      SSH key, with well-known user data script, and the AWS account doesn't
+      have any EBS volumes.
     </p>
     <p>
-      Once the instance is provisioned, it will receive code updates from{' '}
+      Once the instance is provisioned, it will download code updates from{' '}
       <GithubLink /> (branch=release). Community should review commits to the
       repository to ensure the code does not contain backdoors. Such reviews are
       outside of scope of this page.
     </p>
     <p>
-      You should not blindly trust verification status from this page, as
-      anyone can write things on the Internet. You should carefully read the
+      You should not blindly trust verification status from this page. Insetad,
+      you should carefully read the
       steps, and ensure each of them proves what it claims to prove. This is
-      just software, it does some checks that I have though of, but I may have
-      missed some cases. If you find something missing, file a Github issue.
+      just software, it does some checks that I have thought of, but I may have
+      missed some cases (and likely did, see e.g.{' '}
+      <a href="https://github.com/burdakovd/dapps.earth/commit/f45e5a722fc3fd908d0d741953c636df22622095">this</a>).
+      If you find something missing, file a Github issue or a pull request.
     </p>
     <p>
       One may prefer to view this page on Github rather than from potentially
