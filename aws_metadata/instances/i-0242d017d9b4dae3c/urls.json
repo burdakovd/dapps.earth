@@ -1,5 +1,0 @@
-{
-  "DI": "https://ec2.us-east-1.amazonaws.com/?AWSAccessKeyId=AKIAJOWCT4TTVHAZMAUA&Action=DescribeInstances&Expires=2025-01-01&InstanceId=i-0242d017d9b4dae3c&SignatureMethod=HmacSHA256&SignatureVersion=2&Version=2014-10-01&Signature=3xYScTWx2dZTOev3HPfJ1yhSywt9U7MvaEYPJc58kOE%3D",
-  "DIA": "https://ec2.us-east-1.amazonaws.com/?AWSAccessKeyId=AKIAJOWCT4TTVHAZMAUA&Action=DescribeInstanceAttribute&Attribute=userData&Expires=2025-01-01&InstanceId=i-0242d017d9b4dae3c&SignatureMethod=HmacSHA256&SignatureVersion=2&Version=2014-10-01&Signature=5w2HDnSxim3A3lZkQ2vxuRzTarz1rIeKKjW5ehSBIt4%3D",
-  "description": "links to query the state of this instance"
-}
