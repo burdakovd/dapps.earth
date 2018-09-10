@@ -62,8 +62,8 @@ RUN apt-get update && \
 VOLUME /etc/nginx/certs
 
 WORKDIR /root
-COPY nginx/start.sh ./
-COPY nginx/nginx-template.conf /etc/nginx/nginx-template.conf
+COPY services/nginx/start.sh ./
+COPY services/nginx/nginx-template.conf /etc/nginx/nginx-template.conf
 
 RUN rm -rf /var/www/ && mkdir /var/www
 COPY --from=tools /dhparam.pem /etc/nginx/dhparam.pem

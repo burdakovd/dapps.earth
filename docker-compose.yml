@@ -9,7 +9,7 @@ version: '3'
 services:
   proxy:
     restart: always
-    build: proxy
+    build: services/proxy
     container_name: proxy
     environment:
       - BASE_DOMAIN
@@ -22,7 +22,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: nginx/Dockerfile
+      dockerfile: services/nginx/Dockerfile
       args:
         - WEBPACK_MODE=production
     container_name: frontend
@@ -41,7 +41,7 @@ services:
       - swarm
   ssl-renewer:
     restart: always
-    build: ssl-renewer
+    build: services/ssl-renewer
     container_name: ssl-renewer
     environment:
       - BASE_DOMAIN
@@ -55,7 +55,7 @@ services:
       - "53:53/udp"
   ipfs:
     restart: always
-    build: ipfs
+    build: services/ipfs
     container_name: ipfs
     ports:
       - "4001:4001"
@@ -66,7 +66,7 @@ services:
       - RUN_LOCAL_SWARM
   geth:
     restart: always
-    build: geth
+    build: services/geth
     container_name: geth
     ports:
       - "30303:30303"
@@ -77,7 +77,7 @@ services:
       - RUN_LOCAL_SWARM
   swarm:
     restart: always
-    build: swarm
+    build: services/swarm
     container_name: swarm
     depends_on:
       - geth
