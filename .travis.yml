@@ -16,6 +16,9 @@ script:
   - docker run -e JUST_PRINT_AUDIT_PAGE=1 dappsearth_frontend > audit.html.expected
   - diff audit.html audit.html.expected
   - rm -f audit.html.expected
+  - (cd websites/audit && docker build -f Dockerfile.cli -t audit-cli .)
+  - if docker run audit-cli staging.dapps.earth; then echo "This should not have succeeded" && false; else echo "failed as planned"; fi
+  - docker run audit-cli dapps.earth
 
 after_success:
   - ./scripts/travis-deploy.sh .env.staging

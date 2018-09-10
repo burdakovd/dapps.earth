@@ -87,11 +87,13 @@ This is a great question!
 
 In the future, browser could detect IPFS (not talking about Swarm here as it is much younger) content automatically, and check hash of whatever the server returned to avoid MITM attacks.
 
-This is not done yet, so for now you have to trust the gateway is operating honestly. However, the code and deployment procedure is carefully designed in a way that allows you to verify that it is running the code from Github and nothing else.
+This is not done yet, so for now you have to trust the gateway is operating honestly. However, you don't have to trust me. The code and deployment procedure is carefully designed in a way that allows you to verify that it is running the code from Github and nothing else.
 
 See [audit page](https://dapps.earth/audit.html) to verify in a trustless way that EC2 instance that powers this website has been launched in tamperproof way. Please review the audit procedure carefully. Once it is provisioned, it pulls updates from `release` branch of the Github repository and does not allow manual modifications. All updates are also logged and available in the [server logs](https://dapps.earth/integrity/).
 
-As an example of failed audit you can see [audit page for test version of the website](https://dapps.earth/audit.html#staging.dapps.earth/) - it will likely fail audit in many aspects.
+As an example of failed audit you can see [audit page for test version of the website](https://dapps.earth/audit.html#staging.dapps.earth/) - it will fail audit in many aspects.
+
+It is also possible to run audit process using CLI, it runs as part of our [CI](https://travis-ci.com/burdakovd/dapps.earth).
 
 ## Alternatives
 

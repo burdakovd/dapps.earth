@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { Fragment } from 'react';
+import ReactDOMServer from 'react-dom/server';
 import trustedAMIs from './ami.json';
 import invariant from 'invariant';
 import nullthrows from 'nullthrows';
@@ -39,16 +40,34 @@ function onlyNode(nodes) {
 }
 
 function bypassCORSForPublicAPI(url) {
-  // TODO: no need to bypass CORS unless we are in browser
   return 'https://cors-anywhere.herokuapp.com/' + url;
 }
 
 async function auditEntryPoint({ domain, forceInstance }, onStateChange) {
+  console.log('audit started');
   var exportedState = getInitialAuditState();
   onStateChange(exportedState);
 
+  if (window.JSDOM_HOOK != null) {
+    console.log('detected jsdom');
+  }
+
   const reporting = {
     log: (line) => {
+      if (window.JSDOM_HOOK != null) {
+        const trustedHTMLDecode = (input) => {
+          var e = document.createElement('div');
+          e.innerHTML = input;
+          return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+        };
+        console.log(
+          trustedHTMLDecode(
+            ReactDOMServer.renderToStaticMarkup(
+              <Fragment>{line}</Fragment>,
+            ).replace(/\s+/g,' ').trim(),
+          ),
+        );
+      }
       exportedState = {
         ...exportedState,
         logs: [...exportedState.logs, line],
@@ -62,13 +81,13 @@ async function auditEntryPoint({ domain, forceInstance }, onStateChange) {
       };
       onStateChange(exportedState);
       reporting.log(
-        <span>
+        <Fragment>
           <FailedBadge />{' '}
           At this point audit is marked as failed (reason: {reason}).
           All subsequent steps are purely informational and will not
           necessarily make any sense, as they may make statements without
           taking into account the failure in preceding steps.
-        </span>
+        </Fragment>
       );
     },
     finish: () => {
@@ -85,12 +104,20 @@ async function auditEntryPoint({ domain, forceInstance }, onStateChange) {
   } catch (e) {
     reporting.fail(`crash: ${e.toString()}`);
     reporting.log(
-      <span>
+      <Fragment>
         <FailedBadge />{' '}{`Audit procedure crashed: ${e.toString()}`}
-      </span>
+      </Fragment>
     );
   } finally {
+    console.log('audit finished');
     reporting.finish();
+    if (window.JSDOM_HOOK != null) {
+      if (exportedState.isOK) {
+        window.JSDOM_HOOK.resolve();
+      } else {
+        window.JSDOM_HOOK.reject(new Error('Audit failed'));
+      }
+    }
   }
 }
 
@@ -135,7 +162,7 @@ function extractAWSAccessKeyId(rawurl) {
 
 function makeLoggedFetch(reporting) {
   const loggedFetch = async (url, CORSProtectedPublicAPI=false) => {
-    reporting.log(<span>Fetching <Link url={url} /></span>);
+    reporting.log(<Fragment>Fetching <Link url={url} /></Fragment>);
     const response = await fetch(
       CORSProtectedPublicAPI ? bypassCORSForPublicAPI(url) : url,
     );
@@ -185,7 +212,7 @@ async function verifyInstancesLaunchParametersAndReturnOwnerAccount(
     const response = await loggedFetch(instanceWithURLs.urls.DI).then(
       async response => await response.text(),
     ).then(
-      text => (new window.DOMParser()).parseFromString(text, "application/xml"),
+      text => (new window.DOMParser()).parseFromString(text, "text/xml"),
     );
     invariant(
       response.documentElement.namespaceURI === 'http://ec2.amazonaws.com/doc/2014-10-01/',
@@ -276,7 +303,7 @@ async function verifyInstancesLaunchParametersAndReturnOwnerAccount(
     const response = await loggedFetch(instanceWithURLs.urls.DIA).then(
       async response => await response.text(),
     ).then(
-      text => (new window.DOMParser()).parseFromString(text, "application/xml"),
+      text => (new window.DOMParser()).parseFromString(text, "text/xml"),
     );
     invariant(
       response.documentElement.namespaceURI === 'http://ec2.amazonaws.com/doc/2014-10-01/',
@@ -341,7 +368,7 @@ async function verifyAccountHasNoEBSVolumes(reporting, instancesAccountOwner) {
     accountURLs.GU,
     true,
   ).then(response => response.text())
-  .then(text => (new window.DOMParser()).parseFromString(text, "application/xml"));
+  .then(text => (new window.DOMParser()).parseFromString(text, "text/xml"));
   invariant(
     getUserResponse.documentElement.namespaceURI === 'https://iam.amazonaws.com/doc/2010-05-08/',
     'Bad response xmlns',
@@ -385,7 +412,7 @@ async function verifyAccountHasNoEBSVolumes(reporting, instancesAccountOwner) {
   const listMetricsResponse = await loggedFetch(
     accountURLs.LM,
   ).then(response => response.text())
-  .then(text => (new window.DOMParser()).parseFromString(text, "application/xml"));
+  .then(text => (new window.DOMParser()).parseFromString(text, "text/xml"));
   invariant(
     listMetricsResponse.documentElement.namespaceURI === 'http://monitoring.amazonaws.com/doc/2010-08-01/',
     'Bad response xmlns',
@@ -465,7 +492,7 @@ async function getInstancesBackingTheDomain(reporting, domain) {
   const getZoneResponse = await loggedFetch(getZoneURL).then(
     r => r.text()
   ).then(
-    text => (new window.DOMParser()).parseFromString(text, "application/xml"),
+    text => (new window.DOMParser()).parseFromString(text, "text/xml"),
   );
 
   invariant(
@@ -506,7 +533,7 @@ async function getInstancesBackingTheDomain(reporting, domain) {
   const getZoneRecordsResponse = await loggedFetch(getZoneRecordsURL).then(
     r => r.text()
   ).then(
-    text => (new window.DOMParser()).parseFromString(text, "application/xml"),
+    text => (new window.DOMParser()).parseFromString(text, "text/xml"),
   );
 
   invariant(
@@ -590,7 +617,7 @@ async function getInstancesBackingTheDomain(reporting, domain) {
     const response = await loggedFetch(addressWithURLs.urls.DA).then(
       async response => await response.text(),
     ).then(
-      text => (new window.DOMParser()).parseFromString(text, "application/xml"),
+      text => (new window.DOMParser()).parseFromString(text, "text/xml"),
     );
     invariant(
       response.documentElement.namespaceURI === 'http://ec2.amazonaws.com/doc/2014-10-01/',
