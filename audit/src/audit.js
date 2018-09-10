@@ -217,15 +217,13 @@ async function verifyInstancesLaunchParametersAndReturnOwnerAccount(
       continue;
     }
 
-    const key = onlyNode(
-      response.querySelectorAll(
-        'reservationSet > item > instancesSet > item > keyName',
-      ),
-    ).textContent;
-    if (key !== '') {
+    const keyNodes = response.querySelectorAll(
+      'reservationSet > item > instancesSet > item > keyName',
+    );
+    if (keyNodes.length !== 0) {
       reporting.fail(
-        'Instance has an SSH key attached. It means AWS account owner can \
-        just log in via SSH at any time',
+        `Instance has an SSH key ${onlyNode(keyNodes).textContent} attached. \
+        It means AWS account owner can just log in via SSH at any time`,
       );
     } else {
       reporting.log('Instance has no SSH key attached.');
@@ -349,30 +347,18 @@ async function verifyAccountHasNoEBSVolumes(reporting, instancesAccountOwner) {
     'Bad response xmlns',
   );
   const tentativelyRootKey = extractAWSAccessKeyId(accountURLs.GU);
-  const awsUserName = onlyNode(
-    getUserResponse.querySelectorAll('GetUserResult > User > UserName'),
+  
+  const awsUserARN = onlyNode(
+    getUserResponse.querySelectorAll('GetUserResult > User > Arn'),
   ).textContent;
-  if (awsUserName === 'root') {
+  const desiredArn = `arn:aws:iam::${instancesAccountOwner}:root`;
+  if (awsUserARN === desiredArn) {
     reporting.log(
       `Verified that key ${tentativelyRootKey} belongs to root account`,
     );
   } else {
     reporting.fail(
-      `This query should have run as root, got ${awsUserName} instead`,
-    );
-  }
-  const awsUserARN = onlyNode(
-    getUserResponse.querySelectorAll('GetUserResult > User > Arn'),
-  ).textContent;
-  const desiredArn = `arn:aws:iam::${instancesAccountOwner}:user/${awsUserName}`;
-  if (awsUserARN === desiredArn) {
-    reporting.log(
-      `Verified that key ${tentativelyRootKey} belongs to AWS account \
-      ${instancesAccountOwner}`,
-    );
-  } else {
-    reporting.fail(
-      `This query should have run as the same AWS account that owns EC2 \
+      `This query should have run as root of same AWS account that owns EC2 \
       instances (${instancesAccountOwner}), got ${awsUserARN} instead`,
     );
   }
@@ -549,6 +535,8 @@ async function getInstancesBackingTheDomain(reporting, domain) {
     } else if (name === 'staging-2.' + domain + '.' && type === 'NS') {
       // skip
     } else if (name === domain + '.' && type === 'SOA') {
+      // skip
+    } else if (type === 'CAA') {
       // skip
     } else if (name.startsWith('_acme-challenge.')) {
       // skip
