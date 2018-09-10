@@ -94,7 +94,7 @@ const Page = ({ host, instance, onUpdate }) => (
         from Github repository).
       You can also download page{' '}
       <a href="https://github.com/burdakovd/dapps.earth/blob/master/audit.html">from the repository</a>
-      {' '}and open it locally, or <a href="https://github.com/burdakovd/dapps.earth/tree/master/audit">build from source</a>.
+      {' '}and open it locally, or <a href="https://github.com/burdakovd/dapps.earth/tree/master/websites/audit">build from source</a>.
     </p>
     <p>
       This page is using new browser APIs and may not work well in old browsers.
