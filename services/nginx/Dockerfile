@@ -64,6 +64,7 @@ VOLUME /etc/nginx/certs
 WORKDIR /root
 COPY services/nginx/start.sh ./
 COPY services/nginx/nginx-template.conf /etc/nginx/nginx-template.conf
+COPY services/nginx/blacklist.txt /etc/nginx/blacklist.txt
 
 RUN rm -rf /var/www/ && mkdir /var/www
 COPY --from=tools /dhparam.pem /etc/nginx/dhparam.pem
