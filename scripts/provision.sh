@@ -112,8 +112,8 @@ instance_id=$(
     --output text \
   )
 
-  mkdir instances/$instance_id
-  cp $USER_DATA instances/$instance_id/provision-user-data.sh
+  mkdir aws_metadata/instances/$instance_id
+  cp $USER_DATA aws_metadata/instances/$instance_id/provision-user-data.sh
 
   echo $instance_id
 )
@@ -140,8 +140,8 @@ mkdir -p addresses/$ELASTIC_IP
   echo '"description": "links to query the state of this instance"'
   echo '}'
 ) | jq . | tee >(cat >&2) | \
-  tee >(jq 'del(.DA)' > instances/$instance_id/urls.json) | \
-  jq '{DA}' > addresses/$ELASTIC_IP/urls.json
+  tee >(jq 'del(.DA)' > aws_metadata/instances/$instance_id/urls.json) | \
+  jq '{DA}' > aws_metadata/addresses/$ELASTIC_IP/urls.json
 
 echo "Waiting for $instance_id to start..."
 

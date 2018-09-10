@@ -159,7 +159,7 @@ async function verifyInstancesLaunchParametersAndReturnOwnerAccount(
   for (const instance of instances) {
     const entry = await (async () => {
       const urls = await loggedFetch(
-        `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/instances/${instance}/urls.json`,
+        `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/aws_metadata/instances/${instance}/urls.json`,
       ).then(async response => await response.json());
       return {
         instance,
@@ -330,7 +330,7 @@ async function verifyAccountHasNoEBSVolumes(reporting, instancesAccountOwner) {
   );
 
   const accountURLs = await loggedFetch(
-    `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/accounts/${instancesAccountOwner}.json`
+    `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/aws_metadata/accounts/${instancesAccountOwner}.json`
   ).then(response => response.json());
   assertURLMatchesPattern(
     accountURLs.GU,
@@ -347,7 +347,7 @@ async function verifyAccountHasNoEBSVolumes(reporting, instancesAccountOwner) {
     'Bad response xmlns',
   );
   const tentativelyRootKey = extractAWSAccessKeyId(accountURLs.GU);
-  
+
   const awsUserARN = onlyNode(
     getUserResponse.querySelectorAll('GetUserResult > User > Arn'),
   ).textContent;
@@ -434,7 +434,7 @@ async function getInstancesBackingTheDomain(reporting, domain) {
   const loggedFetch = makeLoggedFetch(reporting);
 
   const zoneConfig = await loggedFetch(
-    `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/zones/${domain}`,
+    `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/aws_metadata/zones/${domain}`,
   ).then(response => response.json());
 
   reporting.log(
@@ -570,7 +570,7 @@ async function getInstancesBackingTheDomain(reporting, domain) {
     ipAddresses.map(
       async address => {
         const urls = await loggedFetch(
-          `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/addresses/${address}/urls.json`,
+          `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/aws_metadata/addresses/${address}/urls.json`,
         ).then(r => r.json());
         return { address, urls };
       },
