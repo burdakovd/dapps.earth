@@ -23,8 +23,8 @@ type AuditorProps = {
 }
 */
 
-const PassedBadge = () => <b style={{color: '#29aa46'}}>[PASSED]</b>;
-const FailedBadge = () => <b style={{color: '#db4545'}}>[FAILED]</b>;
+const PassedBadge = () => window.JSDOM_HOOK != null ? '[PASSED]' : <b style={{color: '#29aa46'}}>[PASSED]</b>;
+const FailedBadge = () => window.JSDOM_HOOK != null ? '[FAILED]' : <b style={{color: '#db4545'}}>[FAILED]</b>;
 
 function getInitialAuditState() {
   return {
