@@ -10,6 +10,17 @@ fi
 sed "s/BASE_DOMAIN/$BASE_DOMAIN/g" /etc/nginx/nginx-template.conf \
   > /etc/nginx/nginx.conf
 
+(
+  echo server_name && \
+  cat /etc/nginx/blacklist.txt \
+    | grep . \
+    | sed "s/$/.$BASE_DOMAIN/g" \
+    | sed "s/^/  /g" && \
+  echo ';'
+) > /etc/nginx/blacklisted-server-names.conf
+
+tail -vn +0 /etc/nginx/blacklisted-server-names.conf
+
 SIGNAL=/etc/nginx/certs/signal
 
 # Wait until we populate certs directory at least once
