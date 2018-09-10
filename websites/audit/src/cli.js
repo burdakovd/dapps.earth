@@ -12,7 +12,7 @@ window.JSDOM_HOOK = (function () {
     },
   );
   hook.promise = promise;
-  console.log('hook installed');
+  console.log('JSDOM hook installed');
   return hook;
 })();
 `;
@@ -22,7 +22,6 @@ async function main() {
   const html = fs.readFileSync('./dist/index.html', { encoding: 'utf-8' })
     .split('// JSDOM_HOOK').join(jsdom_hook);
   const url = `https://${domain}/audit.html#${domain}/`;
-  console.log(`Opening ${url}`);
   const virtualConsole = new VirtualConsole();
   virtualConsole.sendTo(console);
   const dom = new JSDOM(
