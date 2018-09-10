@@ -13,13 +13,18 @@ before_install:
 script:
   - docker-compose pull
   - docker-compose build
+  - (cd websites/audit && docker build -f Dockerfile.cli -t audit-cli .)
   - docker run -e JUST_PRINT_AUDIT_PAGE=1 dappsearth_frontend > audit.html.expected
   - diff audit.html audit.html.expected
   - rm -f audit.html.expected
-  - (cd websites/audit && docker build -f Dockerfile.cli -t audit-cli .)
   - if docker run audit-cli staging.dapps.earth; then echo "This should not have succeeded" && false; else echo "failed as planned"; fi
   - docker run audit-cli dapps.earth
 
 after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+      docker login -u="$DOCKER_AUDIT_PUSH_USER" -p="$DOCKER_AUDIT_PUSH_PASSWORD";
+      docker tag audit-cli dappsearth/audit;
+      docker push dappsearth/audit;
+    fi
   - ./scripts/travis-deploy.sh .env.staging
   - ./scripts/travis-deploy.sh .env
