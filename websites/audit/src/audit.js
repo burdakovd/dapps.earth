@@ -283,7 +283,7 @@ async function verifyInstancesLaunchParametersAndReturnOwnerAccount(
       'Bad response xmlns',
     );
     const userDataFromGithub = await loggedFetch(
-      `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/instances/${instanceWithURLs.instance}/provision-user-data.sh`,
+      `https://raw.githubusercontent.com/burdakovd/dapps.earth/master/aws_metadata/instances/${instanceWithURLs.instance}/provision-user-data.sh`,
     ).then(async response => await response.text());
     const userDataFromAWS = atob(onlyNode(
       response.querySelectorAll('userData > value'),
