@@ -119,4 +119,4 @@ Prohibited activities or content include:
 -   **Offensive Content.**  Content that is defamatory, obscene, abusive, invasive of privacy, or otherwise objectionable, including content that constitutes child pornography, relates to bestiality, or depicts non-consensual sex acts.
 -   **Harmful Content**. Content or other computer technology that may damage, interfere with, surreptitiously intercept, or expropriate any system, program, or data, including viruses, Trojan horses, worms, time bombs, or cancelbots.
 
-If you find illegal content on the website, please report it via a Github issue at [https://github.com/burdakovd/dapps.earth/issues](https://github.com/burdakovd/dapps.earth/issues).
+If you find illegal content on the website, please report it via a Github issue at [https://github.com/burdakovd/dapps.earth/issues](https://github.com/burdakovd/dapps.earth/issues). See [dapps.earth/issues/9](https://github.com/burdakovd/dapps.earth/issues/9) and [dapps.earth/pull/10](https://github.com/burdakovd/dapps.earth/pull/10) for an example.
