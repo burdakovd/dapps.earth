@@ -1,5 +1,5 @@
 #!/bin/bash -xe
-export INIT_SCRIPT_SOURCE="curl --silent --fail 'https://raw.githubusercontent.com/burdakovd/dapps.earth/0cf59999ecb053ff80c2e8361aaec26bbac256c3/scripts/initialize-instance.sh'"
+export INIT_SCRIPT_SOURCE="curl --silent --fail 'https://raw.githubusercontent.com/burdakovd/dapps.earth/dc9481a4a97e75850d99213e5769eb776f31579c/scripts/initialize-instance.sh'"
 bash -o pipefail -c "$INIT_SCRIPT_SOURCE" > /root/dapps.earth-init.sh
 chmod +x /root/dapps.earth-init.sh
 mkdir -p /var/log/dapps.earth-integrity
@@ -13,19 +13,19 @@ export MAINTAINER_KEY='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCDBPllnfZm4CcIu4XHj
         echo "such as df -h, free, top -s, etc."
         echo ''
       ) >> /var/log/dapps.earth-integrity/provision.txt
-export DEPLOY_BRANCH='master'
-export DEPLOY_ENV='.env.staging-2'
+export DEPLOY_BRANCH='release'
+export DEPLOY_ENV='.env'
 (
       echo "This machine will accept deployments from Travis for:"
-      echo "  - branch: master"
-      echo "  - env: .env.staging-2"
+      echo "  - branch: release"
+      echo "  - env: .env"
       echo ''
     ) >> /var/log/dapps.earth-integrity/provision.txt
 (
-        echo "This machine has debug key <tst> attached"
-        echo "Holder of that key has ROOT access to the machine"
+        echo "This machine has no debug key attached"
+        echo "Access is restricted to only for Travis deploys"
       ) >> /var/log/dapps.earth-integrity/provision.txt
-export HAS_DEBUG_KEY=1
+export HAS_DEBUG_KEY=0
 echo '' >> /var/log/dapps.earth-integrity/provision.txt
 (
       echo "Source of init script:"

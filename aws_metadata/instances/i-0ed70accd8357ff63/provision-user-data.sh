@@ -1,5 +1,5 @@
 #!/bin/bash -xe
-export INIT_SCRIPT_SOURCE="curl --silent --fail 'https://raw.githubusercontent.com/burdakovd/dapps.earth/169790b1b73b4da9c5ac5f54e8bd5543ad9eaa57/scripts/initialize-instance.sh'"
+export INIT_SCRIPT_SOURCE="curl --silent --fail 'https://raw.githubusercontent.com/burdakovd/dapps.earth/e0663c3eb70b00a14a8a02b74bae4ae75dd2d5db/scripts/initialize-instance.sh'"
 bash -o pipefail -c "$INIT_SCRIPT_SOURCE" > /root/dapps.earth-init.sh
 chmod +x /root/dapps.earth-init.sh
 mkdir -p /var/log/dapps.earth-integrity
@@ -14,11 +14,11 @@ export MAINTAINER_KEY='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCDBPllnfZm4CcIu4XHj
         echo ''
       ) >> /var/log/dapps.earth-integrity/provision.txt
 export DEPLOY_BRANCH='master'
-export DEPLOY_ENV='.env.staging-2'
+export DEPLOY_ENV='.env.staging'
 (
       echo "This machine will accept deployments from Travis for:"
       echo "  - branch: master"
-      echo "  - env: .env.staging-2"
+      echo "  - env: .env.staging"
       echo ''
     ) >> /var/log/dapps.earth-integrity/provision.txt
 (

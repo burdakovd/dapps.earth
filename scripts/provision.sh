@@ -6,6 +6,7 @@ set -o pipefail
 
 [ ! -z "$SECURITY_GROUP" ]
 [ ! -z "$DEPLOY_ENV" ]
+[ ! -z "$AWS_PROFILE" ]
 
 export DEPLOY_BRANCH=$(. $DEPLOY_ENV && echo $BRANCH)
 
@@ -111,8 +112,8 @@ instance_id=$(
     --output text \
   )
 
-  mkdir instances/$instance_id
-  cp $USER_DATA instances/$instance_id/provision-user-data.sh
+  mkdir aws_metadata/instances/$instance_id
+  cp $USER_DATA aws_metadata/instances/$instance_id/provision-user-data.sh
 
   echo $instance_id
 )
@@ -133,14 +134,14 @@ mkdir -p addresses/$ELASTIC_IP
 (
   echo '{'
   ./scripts/aws_query.py $instance_id $ELASTIC_IP \
-    "$(aws configure get aws_access_key_id --profile provisioner)" \
-    "$(aws configure get aws_secret_access_key --profile provisioner)" | \
+    "$(aws configure get aws_access_key_id --profile "$AWS_PROFILE")" \
+    "$(aws configure get aws_secret_access_key --profile "$AWS_PROFILE")" | \
     sed "s/'/\"/g"
   echo '"description": "links to query the state of this instance"'
   echo '}'
 ) | jq . | tee >(cat >&2) | \
-  tee >(jq 'del(.DA)' > instances/$instance_id/urls.json) | \
-  jq '{DA}' > addresses/$ELASTIC_IP/urls.json
+  tee >(jq 'del(.DA)' > aws_metadata/instances/$instance_id/urls.json) | \
+  jq '{DA}' > aws_metadata/addresses/$ELASTIC_IP/urls.json
 
 echo "Waiting for $instance_id to start..."
 

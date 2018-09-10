@@ -45,3 +45,78 @@ Now let us make some _tricky_ versions of those links:
 They look the same as the original links. After you open them, you see the same address in your address bar. If you had bookmarked the original two pages, you'd see your bookmark highlight to indicate that you are on familiar page. However the content is completely different :)
 
 Such thing wouldn't have been possible if different content was served from different subdomains.
+
+## OK, how do I use it?
+We use base32 encoding for subdomains, as this is the sweet spot in set of characters vs length of the hash. For example characters in base58/base64 are case-sensitive, making them not suitable for domain names, whereas base16 produces hashes of 64 characters, which is just one character longer than maximum allowed subdomain name length (63).
+
+### IPFS
+We support base32-encoded CIDv1 as subdomain, for example: [https://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq.ipfs.dapps.earth/](https://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq.ipfs.dapps.earth/)
+
+For convenience, we also perform redirect to subdomain if resource is accessed traditional way, for example: [https://ipfs.dapps.earth/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/](https://ipfs.dapps.earth/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/)
+
+Note the difference in the hash. It is because of base32 vs base58 encoding, and also because of difference in CIDv0 and CIDv1. If in doubt, use traditional addressing and it will redirect you to the correct subdomain.
+
+### Swarm
+We support three protocols: `bzz`, `bzz-hash`, `bzz-immutable`.
+
+`bzz` allows querying mutable content using ENS, for example: [https://theswarm.eth.bzz.dapps.earth](https://theswarm.eth.bzz.dapps.earth)
+
+`bzz-hash` allows querying hash of mutable content using ENS, for example: [https://theswarm.eth.bzz-hash.dapps.earth](https://theswarm.eth.bzz-hash.dapps.earth)
+
+`bzz-immutable` allows querying immutable content directly using hash, for example [https://h4cpab3mz443iehtiipfi5vj46pnytrspvm5peu2u2wz7rz7m4vq.bzz-immutable.dapps.earth/](https://h4cpab3mz443iehtiipfi5vj46pnytrspvm5peu2u2wz7rz7m4vq.bzz-immutable.dapps.earth/) - note that this currently is broken due to [ethersphere/go-ethereum/issues/912](https://github.com/ethersphere/go-ethereum/issues/912)
+
+For convenience, we also perform redirect to subdomain if resource is accessed the traditional way, for example:
+
+- [https://bzz.dapps.earth/bzz:/theswarm.eth/](https://bzz.dapps.earth/bzz:/theswarm.eth/)
+- [https://bzz.dapps.earth/bzz-hash:/theswarm.eth/](https://bzz.dapps.earth/bzz-hash:/theswarm.eth/)
+- [https://bzz.dapps.earth/bzz-immutable:/3f04f0076ccf39b410f3421e5476a9e79edc4e327d59d7929aa6ad9fc73f672b](https://bzz.dapps.earth/bzz-immutable:/3f04f0076ccf39b410f3421e5476a9e79edc4e327d59d7929aa6ad9fc73f672b)
+
+Note the difference in the hash. It is because of base32 vs base16 encoding.
+
+## What is not supported / Limitations
+
+ - IPNS is not supported. IPNS resources are not that useful for ÐApps due to mutability. IPNS websites can also use TXT record to direct their traffic to `ipfs.io` in a safe way. Also, since they can have domains of arbitrary depth, it will be a pain for me to obtain all the necessary SSL certificates.
+ - Writing is not supported. The gateway is read-only. Writing is for power users, and can be done using local software or traditional gateways.
+ - ENS are supported only one level and only in `.eth` zone. The reasoning is that it is an extra hassle to obtain SSL certificates for each subdomain, e.g. I can't get certificate for `*.*.bzz.dapps.earth`, only one wildcard is allowed.
+
+## Why should I trust you?
+
+Speaking of security, why would I want to access ÐApps musing a gateway operated by random person? They can manipulate all the data transmitted, and basically do MITM.
+
+This is a great question!
+
+In the future, browser could detect IPFS (not talking about Swarm here as it is much younger) content automatically, and check hash of whatever the server returned to avoid MITM attacks.
+
+This is not done yet, so for now you have to trust the gateway is operating honestly. However, the code and deployment procedure is carefully designed in a way that allows you to verify that it is running the code from Github and nothing else.
+
+See [audit page](https://dapps.earth/audit.html) to verify in a trustless way that EC2 instance that powers this website has been launched in tamperproof way. Please review the audit procedure carefully. Once it is provisioned, it pulls updates from `release` branch of the Github repository and does not allow manual modifications. All updates are also logged and available in the [server logs](https://dapps.earth/integrity/).
+
+As an example of failed audit you can see [audit page for test version of the website](https://dapps.earth/audit.html#staging.dapps.earth/) - it will likely fail audit in many aspects.
+
+## Alternatives
+
+To my knowledge, there are two websites on the Internet providing similar functionality.
+
+`eth.show` for Swarm, e.g. [http://theswarm.eth.show/](http://theswarm.eth.show/)
+
+`ipfs.dweb.link` for IPFS, e.g. [http://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq.ipfs.dweb.link/](http://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq.ipfs.dweb.link/)
+
+Neither of them supports HTTPS encryption though at the time of writing.
+
+## Contributions
+
+Issues and pull requests are welcome at [https://github.com/burdakovd/dapps.earth](https://github.com/burdakovd/dapps.earth)
+
+Donations are accepted at [0x93864E077B53d68BFd09DE1A63CAeDCBb24595F2](https://etherscan.io/address/0x93864E077B53d68BFd09DE1A63CAeDCBb24595F2) in ETH, or at [3PHDhyeF3VmQ3k3enmBSkbZrSXhztHU4yH](https://www.blockchain.com/btc/address/3PHDhyeF3VmQ3k3enmBSkbZrSXhztHU4yH) in BTC.
+
+## Acceptable Use Policy and abuse reports
+
+It is not allowed to abuse the website for any illegal, harmful, fraudulent, infringing or offensive use, or to download or view content that is illegal, harmful, fraudulent or offensive.
+
+Prohibited activities or content include:
+-   **Illegal, Harmful or Fraudulent Activities.**  Any activities that are illegal, that violate the rights of others, or that may be harmful to others, our operations or reputation, including disseminating, promoting or facilitating child pornography, offering or disseminating fraudulent goods, services, schemes, or promotions, make-money-fast schemes, ponzi and pyramid schemes, phishing, or pharming.
+-   **Infringing Content.**  Content that infringes or misappropriates the intellectual property or proprietary rights of others.
+-   **Offensive Content.**  Content that is defamatory, obscene, abusive, invasive of privacy, or otherwise objectionable, including content that constitutes child pornography, relates to bestiality, or depicts non-consensual sex acts.
+-   **Harmful Content**. Content or other computer technology that may damage, interfere with, surreptitiously intercept, or expropriate any system, program, or data, including viruses, Trojan horses, worms, time bombs, or cancelbots.
+
+If you find illegal content on the website, please report it via a Github issue at [https://github.com/burdakovd/dapps.earth/issues](https://github.com/burdakovd/dapps.earth/issues).
