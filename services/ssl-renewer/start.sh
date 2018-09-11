@@ -12,8 +12,11 @@ whoami
 if test "$user" = 'root'; then
   ls -lh /etc/nginx
   ls -lh /etc/nginx/certs || true
-  chown -R renewer:users /etc/nginx/certs
-  chmod -R u=rwx,g=rx,o= /etc/nginx/certs
+  mkdir -p /etc/nginx/certs/ssl/$BASE_DOMAIN
+  chown -R renewer:users /etc/nginx/certs/ssl
+  chmod -R u=rwx,g=rx,o= /etc/nginx/certs/ssl
+  mkdir -p /etc/nginx/certs/signals
+  chown -R renewer:users /etc/nginx/certs/signals
   chown -R renewer:users /successes
 
   mkdir -p /nanodns
@@ -32,17 +35,18 @@ umask 027
 
 ls -lh /etc/nginx
 ls -lh /etc/nginx/certs
+ls -lh /etc/nginx/certs/ssl
 
-rm -f /etc/nginx/certs/perm-test
-: > /etc/nginx/certs/perm-test
+rm -f /etc/nginx/certs/ssl/perm-test
+: > /etc/nginx/certs/ssl/perm-test
 
-if sudo -nu nano-dns /bin/cat /etc/nginx/certs/perm-test; then
+if sudo -nu nano-dns /bin/cat /etc/nginx/certs/ssl/perm-test; then
   echo "bad user setup"
   false
 else
   echo "good, nano-dns can't read certs"
 fi
-rm -f /etc/nginx/certs/perm-test
+rm -f /etc/nginx/certs/ssl/perm-test
 
 CACHE_VERSION=8
 
@@ -101,7 +105,7 @@ dns_nano_add() {
 }
 
 dns_nano_rm() {
-  grep -v "\$2" $NANODNS_CONFIG > $NANODNS_CONFIG.f
+  grep -v -- "\$2" $NANODNS_CONFIG > $NANODNS_CONFIG.f
   mv $NANODNS_CONFIG.f $NANODNS_CONFIG
 }
 EOF
@@ -140,16 +144,13 @@ while true; do
         &
       if wait $!; then
         echo "Got certificate for $HOSTS..."
-        HOST=$(echo $HOSTS | awk '{print $1}')
-        SANITIZED_HOST=$(echo $HOST | sed 's/[*]/wildcard/')
-        ls -lh /etc/nginx
-        mkdir -p /etc/nginx/certs/$SANITIZED_HOST
-        ~/.acme.sh/acme.sh --install-cert -d $HOST \
-          --cert-file /etc/nginx/certs/$SANITIZED_HOST/cert \
-          --key-file /etc/nginx/certs/$SANITIZED_HOST/key \
-          --fullchain-file /etc/nginx/certs/$SANITIZED_HOST/fullchain \
+        ls -lh /etc/nginx/certs
+        ~/.acme.sh/acme.sh --install-cert -d $BASE_DOMAIN \
+          --cert-file /etc/nginx/certs/ssl/$BASE_DOMAIN/cert \
+          --key-file /etc/nginx/certs/ssl/$BASE_DOMAIN/key \
+          --fullchain-file /etc/nginx/certs/ssl/$BASE_DOMAIN/fullchain \
           --reloadcmd "true"
-        date >> /etc/nginx/certs/signal
+        date >> /etc/nginx/certs/signals/signal
         record_success "$HOSTS"
       else
         echo "Renewal for $HOSTS failed!"

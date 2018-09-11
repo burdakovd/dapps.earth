@@ -36,7 +36,7 @@ RUN echo \
   "renewer ALL=(root) NOPASSWD: /bin/nano-dns.py nano-dns /nanodns/config.txt" >> \
   /etc/sudoers
 RUN echo \
-  "renewer ALL=(nano-dns) NOPASSWD: /bin/cat /etc/nginx/certs/perm-test" >> \
+  "renewer ALL=(nano-dns) NOPASSWD: /bin/cat /etc/nginx/certs/ssl/perm-test" >> \
   /etc/sudoers
 
 USER renewer
