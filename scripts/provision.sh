@@ -100,7 +100,7 @@ instance_id=$(
     --security-group-ids "$SECURITY_GROUP" \
     --count 1 \
     --iam-instance-profile Name="logger" \
-    --instance-type m1.small \
+    --instance-type c1.medium \
     --query 'Instances[0].InstanceId' \
     --user-data file://$USER_DATA \
     $(if [ ! -z "$DEBUG_KEY_NAME" ]; then \
@@ -129,7 +129,7 @@ fi
 
 [ ! -z "$ELASTIC_IP" ]
 
-mkdir -p addresses/$ELASTIC_IP
+mkdir -p aws_metadata/addresses/$ELASTIC_IP
 
 (
   echo '{'
