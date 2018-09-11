@@ -567,6 +567,8 @@ async function getInstancesBackingTheDomain(reporting, domain) {
       // skip
     } else if (name.startsWith('_acme-challenge.')) {
       // skip
+    } else if (name.startsWith('_psl.')) {
+      // skip
     } else if (name === 'acme-dns.' + domain + '.') {
       // skip
     } else {
