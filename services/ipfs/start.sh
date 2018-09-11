@@ -40,7 +40,7 @@ ipfs config --json Addresses.Announce "[\"/ip4/$EXTERNAL_IP/tcp/4001\"]"
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
 
-SIZE_MULTIPLIER=$(if [ -z "$RUN_LOCAL_SWARM" ]; then echo 3; else echo 1; fi)
+SIZE_MULTIPLIER=$(if [ -z "$RUN_LOCAL_SWARM" ]; then echo 10; else echo 5; fi)
 if [ ! -z $IS_LARGE ]; then
   ipfs config Datastore.StorageMax $(expr 20 \* $SIZE_MULTIPLIER)GB
 else
