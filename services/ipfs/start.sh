@@ -74,4 +74,4 @@ ipfs config --json Swarm.AddrFilters '[
 
 ipfs config show
 
-exec env IPFS_LOGGING=info ipfs daemon --enable-gc
+exec env IPFS_LOGGING=info ipfs daemon --migrate=true --enable-gc
