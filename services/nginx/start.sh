@@ -21,7 +21,7 @@ sed "s/BASE_DOMAIN/$BASE_DOMAIN/g" /etc/nginx/nginx-template.conf \
 
 tail -vn +0 /etc/nginx/blacklisted-server-names.conf
 
-SIGNAL=/etc/nginx/certs/signal
+SIGNAL=/etc/nginx/certs/signals/signal
 
 # Wait until we populate certs directory at least once
 while [ ! -f $SIGNAL ]; do

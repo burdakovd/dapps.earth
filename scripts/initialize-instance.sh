@@ -12,6 +12,11 @@ EC2_AVAIL_ZONE=$(curl -s http://169.254.169.254/latest/meta-data/placement/avail
 EC2_REGION=$(echo "$EC2_AVAIL_ZONE" | sed 's/[a-z]$//')
 
 # Basic set up
+dd if=/dev/zero of=/mnt/swap count=2048 bs=1MiB
+chmod 600 /mnt/swap
+mkswap /mnt/swap
+echo '/mnt/swap none swap defaults 0 0' >> /etc/fstab
+swapon -a
 free
 
 # grab UID=100,101,1001 as they are used inside docker
