@@ -14,7 +14,7 @@ Currently only ÐApps from the planet Earth are supported (hence the gateway nam
 
 ## Why? What's wrong with existing gateways?
 
-There are existing gateways to IPFS and Swarm, notably [gateway.ipfs.io](https://gateway.ipfs.io/) and [swarm-gateways.net](https://swarm-gateways.net/), however, they aren't providing access in a secure way, so I wouldn't advise to use ÐApps through such gateways, as I'll explain in a moment.
+There are existing gateways to IPFS and Swarm, notably [ipfs.io](https://ipfs.io/) and [swarm-gateways.net](https://swarm-gateways.net/), however, they aren't providing access in a secure way, so I wouldn't advise to use ÐApps through such gateways, as I'll explain in a moment.
 
 Furthermore, due to the same reasons, even http gateway on localhost (as a lot of people use) is not secure, unless you take special precautions.
 
@@ -22,7 +22,7 @@ Web security has evolved over many years, and is a result of work of various sta
 
 One important concept in Web security model is **origin**. It roughly corresponds to a domain name. Browser mostly assume that objects from the same origin _trust_ each other, while different origins _do not trust_ each other. I.e. microsoft.com is not supposed to access or modify your data at google.com, whereas google.com/maps is allowed to access data from google.com
 
-Mainstream IPFS/Swarm gateways serve _all_ of the content from a single _origin_, i.e. `gateway.ipfs.io` or `swarm-gateways.net`, therefore throwing away all _origin_-based security model that Web community have been building over the years.
+Mainstream IPFS/Swarm gateways serve _all_ of the content from a single _origin_, i.e. `ipfs.io` or `swarm-gateways.net`, therefore throwing away all _origin_-based security model that Web community have been building over the years.
 
 IPFS and Swarm have some internal concept of websites, but browsers have no way to know about those, so they just assume the whole gateway is just a giant website with millions of pages, and they let all of the pages interact with each other without any restriction. Arbitrary page can read/modify other pages' cookies, local storage, and even install service worker that will forever be able to intercept all requests to that gateway and respond with any content it wishes (we [dodged the bullet](https://github.com/ipfs/go-ipfs/issues/4025) with service worker due to pure luck)
 
@@ -33,13 +33,13 @@ IPFS and Swarm have some internal concept of websites, but browsers have no way 
 If you are still not convinced of security risks of traditional gateways, here is a demo.
 
 Consider the following two pages:
- - [https://gateway.ipfs.io/ipns/ipfs.io/](https://gateway.ipfs.io/ipns/ipfs.io/)
+ - [https://ipfs.io/ipns/ipfs.io/](https://ipfs.io/ipns/ipfs.io/)
  - [https://swarm-gateways.net/bzz:/theswarm.eth/](https://swarm-gateways.net/bzz:/theswarm.eth/)
 
 These two links are using official gateways and are pointing to home pages of IPFS and Swarm correspondingly.
 
 Now let us make some _tricky_ versions of those links:
- - [https://gateway.ipfs.io/ipns/ipfs.io/](https://bit.ly/dapps-earth-demo-01)
+ - [https://ipfs.io/ipns/ipfs.io/](https://bit.ly/dapps-earth-demo-01)
  - [https://swarm-gateways.net/bzz:/theswarm.eth/](https://bit.ly/dapps-earth-demo-02)
 
 They look the same as the original links. After you open them, you see the same address in your address bar. If you had bookmarked the original two pages, you'd see your bookmark highlight to indicate that you are on familiar page. However the content is completely different :)
@@ -121,6 +121,8 @@ Neither of them supports HTTPS encryption though at the time of writing.
 ## Contributions
 
 Issues and pull requests are welcome at [https://github.com/burdakovd/dapps.earth](https://github.com/burdakovd/dapps.earth)
+
+Please do carefully review audit procedure, as we want to make sure it is well-defined and if there are issues, we'd want to find them sooner. The more people review it now - the better.
 
 Donations are accepted at [0x93864E077B53d68BFd09DE1A63CAeDCBb24595F2](https://etherscan.io/address/0x93864E077B53d68BFd09DE1A63CAeDCBb24595F2) in ETH, or at [3PHDhyeF3VmQ3k3enmBSkbZrSXhztHU4yH](https://www.blockchain.com/btc/address/3PHDhyeF3VmQ3k3enmBSkbZrSXhztHU4yH) in BTC.
 

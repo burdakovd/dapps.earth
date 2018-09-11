@@ -47,7 +47,7 @@ services:
       - BASE_DOMAIN
       - NS_DOMAIN
       - HOSTS=$BASE_DOMAIN *.$BASE_DOMAIN *.ipfs.$BASE_DOMAIN *.eth.bzz.$BASE_DOMAIN *.eth.bzz-hash.$BASE_DOMAIN *.bzz-immutable.$BASE_DOMAIN
-      - MAX_SSL_CERTIFICATE_AGE_DAYS=14
+      - MAX_SSL_CERTIFICATE_AGE_DAYS=30
     volumes:
       - ssl-renewer-successes:/successes
       - certs:/etc/nginx/certs
