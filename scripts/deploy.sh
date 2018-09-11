@@ -22,8 +22,8 @@ else
   [ ! -z "$TRAVIS" ]
   [ ! -z "$ENV" ]
   echo "My IP: $(dig +short myip.opendns.com @resolver1.opendns.com)"
-  IPS="$(dig +short deploy.$BASE_DOMAIN a)"
-  echo "Will deploy code to the following addresses of $BASE_DOMAIN: $(echo $IPS)"
+  IPS="$(dig +short _deploy.$BASE_DOMAIN a)"
+  echo "Will deploy code to the following addresses of _deploy.$BASE_DOMAIN: $(echo $IPS)"
 
   for IP in $IPS; do
     set +e
