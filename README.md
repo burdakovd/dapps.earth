@@ -122,6 +122,8 @@ Neither of them supports HTTPS encryption though at the time of writing.
 
 Issues and pull requests are welcome at [https://github.com/burdakovd/dapps.earth](https://github.com/burdakovd/dapps.earth)
 
+Please do carefully review audit procedure, as we want to make sure it is well-defined and if there are issues, we'd want to find them sooner. The more people review it now - the better.
+
 Donations are accepted at [0x93864E077B53d68BFd09DE1A63CAeDCBb24595F2](https://etherscan.io/address/0x93864E077B53d68BFd09DE1A63CAeDCBb24595F2) in ETH, or at [3PHDhyeF3VmQ3k3enmBSkbZrSXhztHU4yH](https://www.blockchain.com/btc/address/3PHDhyeF3VmQ3k3enmBSkbZrSXhztHU4yH) in BTC.
 
 ## Acceptable Use Policy and abuse reports
