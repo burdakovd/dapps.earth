@@ -81,7 +81,7 @@ Note the difference in the hash. It is because of base32 vs base16 encoding.
 
 ## Why should I trust you?
 
-Speaking of security, why would I want to access ÐApps musing a gateway operated by random person? They can manipulate all the data transmitted, and basically do MITM.
+Speaking of security, why would I want to access ÐApps via a gateway operated by random person? They can manipulate all the data transmitted, and basically do MITM!
 
 This is a great question!
 
