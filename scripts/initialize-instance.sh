@@ -47,7 +47,7 @@ cd /
 
 echo "*/5 * * * * root cd /root/cloudwatch-install/aws-scripts-mon && \
   ./mon-put-instance-data.pl --mem-util --mem-used --mem-avail --swap-util \
-    --swap-used --disk-path=/ --disk-space-util --disk-space-used \
+    --swap-used --disk-path=/ --disk-path=/media/ephemeral0 --disk-space-util --disk-space-used \
     --disk-space-avail --from-cron" \
   > /etc/cron.d/send-cloudwatch-stats
 
