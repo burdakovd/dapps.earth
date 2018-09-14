@@ -28,3 +28,11 @@ after_success:
     fi
   - ./scripts/travis-deploy.sh .env.staging
   - ./scripts/travis-deploy.sh .env
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/644b02fa8aa133e82214
+    on_success: change
+    on_failure: always
+    on_start: never
