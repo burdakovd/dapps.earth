@@ -1,6 +1,6 @@
 # <img src="https://dapps.earth/icon300.png" alt="drawing" width="32" valign="middle"/> dapps.earth: subdomain-based IPFS and Swarm gateway
 
-Source code: [https://github.com/burdakovd/dapps.earth](https://github.com/burdakovd/dapps.earth) [![Build Status](https://api.travis-ci.com/burdakovd/dapps.earth.svg?branch=master)](https://travis-ci.com/burdakovd/dapps.earth)
+Source code: [https://github.com/burdakovd/dapps.earth](https://github.com/burdakovd/dapps.earth) [![Build Status](https://api.travis-ci.com/burdakovd/dapps.earth.svg?branch=master)](https://travis-ci.com/burdakovd/dapps.earth) [![Join the chat at https://gitter.im/dapps-earth/Lobby](https://badges.gitter.im/dapps-earth/Lobby.svg)](https://gitter.im/dapps-earth/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Deployment transparency: [audit server integrity](https://dapps.earth/audit.html), [view server logs](https://dapps.earth/integrity/), [CI credentials](https://dapps.earth/travis-credentials/)
 
