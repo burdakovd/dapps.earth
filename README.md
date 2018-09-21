@@ -14,7 +14,7 @@ Currently only ÐApps from the planet Earth are supported (hence the gateway nam
 
 ## Why? What's wrong with existing gateways?
 
-There are existing gateways to IPFS and Swarm, notably [ipfs.io](https://ipfs.io/) and [swarm-gateways.net](https://swarm-gateways.net/), however, they aren't providing access in a secure way, so I wouldn't advise to use ÐApps through such gateways, as I'll explain in a moment.
+There are existing gateways to IPFS and Swarm, notably [ipfs.io](https://ipfs.io/), [Cloudflare IPFS Gateway](https://blog.cloudflare.com/distributed-web-gateway/) and [swarm-gateways.net](https://swarm-gateways.net/), however, they aren't providing access in a secure way, so I wouldn't advise to use ÐApps through such gateways, as I'll explain in a moment.
 
 Furthermore, due to the same reasons, even http gateway on localhost (as a lot of people use) is not secure, unless you take special precautions.
 
@@ -34,12 +34,14 @@ If you are still not convinced of security risks of traditional gateways, here i
 
 Consider the following two pages:
  - [https://ipfs.io/ipns/ipfs.io/](https://ipfs.io/ipns/ipfs.io/)
+ - [https://cloudflare-ipfs.com/ipns/ipfs.io/](https://cloudflare-ipfs.com/ipns/ipfs.io/)
  - [https://swarm-gateways.net/bzz:/theswarm.eth/](https://swarm-gateways.net/bzz:/theswarm.eth/)
 
 These two links are using official gateways and are pointing to home pages of IPFS and Swarm correspondingly.
 
 Now let us make some _tricky_ versions of those links:
  - [https://ipfs.io/ipns/ipfs.io/](https://bit.ly/dapps-earth-demo-01)
+ - [https://cloudflare-ipfs.com/ipns/ipfs.io/](http://bit.ly/dapps-earth-demo-03)
  - [https://swarm-gateways.net/bzz:/theswarm.eth/](https://bit.ly/dapps-earth-demo-02)
 
 They look the same as the original links. After you open them, you see the same address in your address bar. If you had bookmarked the original two pages, you'd see your bookmark highlight to indicate that you are on familiar page. However the content is completely different :)
