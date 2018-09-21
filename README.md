@@ -14,7 +14,7 @@ Currently only ÐApps from the planet Earth are supported (hence the gateway nam
 
 ## Why? What's wrong with existing gateways?
 
-There are existing gateways to IPFS and Swarm, notably [ipfs.io](https://ipfs.io/), [Cloudflare IPFS Gateway](https://blog.cloudflare.com/distributed-web-gateway/) and [swarm-gateways.net](https://swarm-gateways.net/), however, they aren't providing access in a secure way, so I wouldn't advise to use ÐApps through such gateways, as I'll explain in a moment.
+There are existing gateways to IPFS and Swarm, notably [ipfs.io](https://ipfs.io/), [Cloudflare IPFS Gateway](https://www.cloudflare.com/distributed-web-gateway/) and [swarm-gateways.net](https://swarm-gateways.net/), however, they aren't providing access in a secure way, so I wouldn't advise to use ÐApps through such gateways, as I'll explain in a moment.
 
 Furthermore, due to the same reasons, even http gateway on localhost (as a lot of people use) is not secure, unless you take special precautions.
 
