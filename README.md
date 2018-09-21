@@ -41,7 +41,7 @@ These two links are using official gateways and are pointing to home pages of IP
 
 Now let us make some _tricky_ versions of those links:
  - [https://ipfs.io/ipns/ipfs.io/](https://bit.ly/dapps-earth-demo-01)
- - [https://cloudflare-ipfs.com/ipns/ipfs.io/](http://bit.ly/dapps-earth-demo-03)
+ - [https://cloudflare-ipfs.com/ipns/ipfs.io/](https://bit.ly/dapps-earth-demo-03)
  - [https://swarm-gateways.net/bzz:/theswarm.eth/](https://bit.ly/dapps-earth-demo-02)
 
 They look the same as the original links. After you open them, you see the same address in your address bar. If you had bookmarked the original two pages, you'd see your bookmark highlight to indicate that you are on familiar page. However the content is completely different :)
