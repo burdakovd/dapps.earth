@@ -74,4 +74,6 @@ ipfs config --json Swarm.AddrFilters '[
 
 ipfs config show
 
-exec env IPFS_LOGGING=info ipfs daemon --migrate=true --enable-gc
+# Restart IPFS daemon once every 24 hours as it is leaking memory
+# https://github.com/ipfs/go-ipfs/issues/3318
+exec env IPFS_LOGGING=info timeout -t 86400 ipfs daemon --migrate=true --enable-gc
