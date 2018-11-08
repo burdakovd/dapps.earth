@@ -118,7 +118,7 @@ To my knowledge, there are two websites on the Internet providing similar functi
 
 `ipfs.dweb.link` for IPFS, e.g. [http://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq.ipfs.dweb.link/](http://bafybeiemxf5abjwjbikoz4mc3a3dla6ual3jsgpdr4cjr3oz3evfyavhwq.ipfs.dweb.link/). Does not support SSL.
 
-[`meeseeks.app`](https://github.com/ricmoo/meeseeks-app) for IPFS, e.g. [https://0xgbwrx7wokisx2ujqhu3rg2u4gdaw7cnrtpn47kme3kk3fn7jfguro.meeseeks.app/](https://0xgbwrx7wokisx2ujqhu3rg2u4gdaw7cnrtpn47kme3kk3fn7jfguro.meeseeks.app/), does all IPFS fetching client-side (backend returns just static bootstrap page), doesn't support fetching accessing content in IPFS subdirectories.
+[`meeseeks.app`](https://github.com/ricmoo/meeseeks-app) for IPFS, e.g. [https://0xgbwrx7wokisx2ujqhu3rg2u4gdaw7cnrtpn47kme3kk3fn7jfguro.meeseeks.app/](https://0xgbwrx7wokisx2ujqhu3rg2u4gdaw7cnrtpn47kme3kk3fn7jfguro.meeseeks.app/), does all IPFS fetching client-side (backend returns just static bootstrap page), doesn't support fetching content in IPFS subdirectories.
 
 ## Contributions
 
